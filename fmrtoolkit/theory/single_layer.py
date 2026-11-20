@@ -10,7 +10,8 @@ import time
 
 import matplotlib.pyplot as plt
 import numpy as np
-from sympy import I, Matrix, cos, diff, pi, rad, re, sin, solve, symbols
+from sympy import I, Matrix, cos, diff, lambdify, pi, rad, re, sin, solve, symbols
+from fmrtoolkit.theory.free_energy import e_libre_IP_1L, e_libre_OP_1L
 
 
 def variacion_angular_ip(archivo,
@@ -74,11 +75,7 @@ def variacion_angular_ip(archivo,
     for valor in np.arange(ang_inicio, ang_fin + paso_ang/2, paso_ang):
         angcamp = float(rad(valor))   # ángulo del campo en radianes
 
-        # Energía libre con eje fácil en cualquier dirección
-        Elibre = (-h*espesor*magn*(cos(angmagn-angcamp))*(sin(angazimut))
-                  + espesor*2*pi.evalf(10)*(magn**2)*(cos(angazimut))**2
-                  - 0.25*espesor*Kc*((sin(2*angazimut))**2 + ((sin(2*angmagn))**2)*(sin(angazimut))**4)
-                  - Ku*espesor*((sin(angazimut))**2)*((cos(angmagn-beta))**2))
+        Elibre = e_libre_IP_1L(angazimut, angmagn, h, angcamp, espesor, magn, Kc, Ku, beta)
 
         # Derivadas segundas
         E_theta1_phi1 = diff(Elibre, angazimut, angmagn)
@@ -96,12 +93,12 @@ def variacion_angular_ip(archivo,
 
         lista_min = []
         for campo in campos:
-            azim_a = np.pi/2
 
-            Elibre_campo = (-campo*espesor*magn*np.cos(ang_Ma_rad-angcamp)*np.sin(azim_a)
-                            + espesor*2*np.pi*(magn**2)*(np.cos(azim_a))**2
-                            - 0.25*espesor*Kc*((np.sin(2*azim_a))**2 + ((np.sin(2*ang_Ma_rad))**2)*(np.sin(azim_a))**4)
-                            - Ku*espesor*((np.sin(azim_a))**2)*((np.cos(ang_Ma_rad-beta))**2))
+            energia_num = lambdify((angmagn, angazimut, h), Elibre, 'numpy')
+
+            for campo in campos:
+                Elibre_campo = energia_num(ang_Ma_rad, np.pi/2, campo)   # M en el plano, todos los ángulos
+                ang_a = ang_Ma_deg[np.argmin(Elibre_campo)]
 
             ang_a = ang_Ma_deg[np.argmin(Elibre_campo)]
 
