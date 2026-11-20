@@ -211,5 +211,5 @@ See [`LICENSE`](LICENSE).
 
 ## Authors
 
-- *Your name* — Instituto Balseiro / Centro Atómico Bariloche
-- *Co-author name*
+- *Angel A. Perez Martinez* — Instituto Balseiro / Centro Atómico Bariloche
+
