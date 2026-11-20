@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Spyder / VS Code
+.spyproject/
+.vscode/
+
+# Datos y resultados (no van al repo)
+*.dat
+output_*.txt
+fit_*.txt
+*.pdf
+
+# Datos de ejemplo que sí queremos subir
+!examples/data/*
