@@ -92,18 +92,19 @@ def variacion_angular_ip(archivo,
         # ==================================================
 
         lista_min = []
+
+        energia_num = lambdify((angmagn, angazimut, h), Elibre, 'numpy')
+
         for campo in campos:
 
-            energia_num = lambdify((angmagn, angazimut, h), Elibre, 'numpy')
-
-            for campo in campos:
-                Elibre_campo = energia_num(ang_Ma_rad, np.pi/2, campo)   # M en el plano, todos los ángulos
-                ang_a = ang_Ma_deg[np.argmin(Elibre_campo)]
+            Elibre_campo = energia_num(ang_Ma_rad, np.pi/2, campo)   # M en el plano, todos los ángulos
 
             ang_a = ang_Ma_deg[np.argmin(Elibre_campo)]
 
             m_eval = m.evalf(20, subs={angmagn: ang_a*np.pi/180, angazimut: np.pi/2, h: campo})
+
             determinante = m_eval.det(method='berkowitz')
+
             solucion = list(solve(determinante, frec))
 
             lista_min.append([campo, valor, solucion[1], ang_a])
@@ -172,8 +173,176 @@ def variacion_angular_ip(archivo,
 
     return angulo_IP, Hr
 
+# ==================================================
+# VARIACIÓN ANGULAR FUERA DEL PLANO (OP)
+# ==================================================
+
+def variacion_angular_op(archivo,
+                         magn=785, g=2.11, frecuencia=9.78e9,
+                         col_angulo=0, col_Hr=1, defasaje_deg=-3,
+                         margen_campo=90, paso_campo=80,
+                         ang_inicio=0, ang_fin=180, paso_ang=5,
+                         paso_phi_M=0.05, graficar=True):
+    """
+    Variación angular de Hr con el campo rotando fuera del plano
+    (monocapa sin anisotropía en el plano, por ejemplo Py).
+
+    Ejes: la normal de la película es el eje y. El campo y M rotan en el plano x-y
+    (angazimut = pi/2), así que no hay singularidad cuando M queda perpendicular.
+    Ángulo del campo: 0° = en el plano de la película, 90° = perpendicular.
+
+    archivo       : output_*.txt de los ajustes de la variación angular OP experimental
+    magn          : magnetización efectiva (emu/cm³)
+    g, frecuencia : factor g y frecuencia de medición (Hz)
+    col_angulo    : columna del ángulo en el archivo (la 0)
+    col_Hr        : columna del Hr experimental que se compara
+    defasaje_deg  : corrimiento de los ángulos experimentales para que coincidan con la teoría
+    margen_campo  : Oe que se agregan por debajo y por encima del rango experimental
+                    (tiene que ser mayor que paso_campo)
+    paso_campo    : paso de campo de la simulación (Oe)
+    ang_inicio, ang_fin, paso_ang : ángulos del campo que se simulan (grados, ang_fin incluido)
+    paso_phi_M    : paso en grados para buscar el ángulo de equilibrio de M
+    """
+    inicio = time.time()
+
+    # ==================================================
+    # DATOS EXPERIMENTALES
+    # ==================================================
+
+    data = np.loadtxt(archivo, skiprows=1, delimiter=',')
+    angulo_exp = data[:, col_angulo]
+    Hr_exp = data[:, col_Hr]
+
+    # Rango de campos de la simulación: el experimental más un margen de seguridad
+    campos = np.arange(np.nanmin(Hr_exp) - margen_campo,
+                       np.nanmax(Hr_exp) + margen_campo, paso_campo)
+
+    # ==================================================
+    # PARÁMETROS
+    # ==================================================
+
+    h, frec, angmagn, angazimut = symbols('h, frec, angmagn, angazimut')
+
+    gamma = np.float64(8794000*g)
+    BX = np.float64(2*np.pi*frecuencia)
+
+    # Con el campo perpendicular: ω/γ = Hr - 4πM  ->  M = (Hr_max - ω/γ) / 4π
+    M_sugerida = (np.nanmax(Hr_exp) - BX/gamma) / (4*np.pi)
+    print(f'Valor sugerido de la magnetización: {M_sugerida:.1f} emu/cm³')
+
+    # Ángulo de M en el plano x-normal: toda la vuelta, por si el campo pasa de 180°
+    ang_M_deg = np.arange(0, 185, paso_phi_M)
+    ang_M_rad = np.deg2rad(ang_M_deg)
+
+    angulo_OP = []
+    ang_eq = []
+    Hr = []
+
+    for valor in np.arange(ang_inicio, ang_fin + paso_ang/2, paso_ang):
+        angcamp = float(rad(valor))   # ángulo del campo en radianes
+
+        Elibre = e_libre_OP_1L(angazimut, angmagn, h, angcamp, magn)
+
+        # Derivadas segundas
+        E_theta_phi = diff(Elibre, angazimut, angmagn)
+        E_theta_theta = diff(Elibre, angazimut, angazimut)
+        E_phi_phi = diff(Elibre, angmagn, angmagn)
+
+        m = Matrix([[I*(frec/gamma) + E_theta_phi/(magn*sin(angazimut)),
+                     E_phi_phi/(magn*(sin(angazimut))**2)],
+                    [-E_theta_theta/magn,
+                     I*(frec/gamma) - E_theta_phi/(magn*sin(angazimut))]])
+
+        # ==================================================
+        # ÁNGULO DE EQUILIBRIO Y FRECUENCIA PARA CADA CAMPO
+        # ==================================================
+
+        lista_min = []
+
+        energia_num = lambdify((angmagn, angazimut, h), Elibre, 'numpy')
+
+        for campo in campos:
+
+            Elibre_campo = energia_num(ang_M_rad, np.pi/2, campo)   # M en el plano x-normal, se barre φ
+
+            ang_a = ang_M_deg[np.argmin(Elibre_campo)]
+
+            m_eval = m.evalf(20, subs={angmagn: ang_a*np.pi/180, angazimut: np.pi/2, h: campo})
+
+            determinante = m_eval.det(method='berkowitz')
+
+            solucion = list(solve(determinante, frec))
+
+            lista_min.append([campo, valor, solucion[1], ang_a])
+
+        matriz = np.array(lista_min)
+
+        # ==================================================
+        # INTERPOLACIÓN LINEAL: campo donde la frecuencia cruza BX
+        # ==================================================
+
+        f_primera = float(re(matriz[0][2]))
+        f_ultima = float(re(matriz[-1][2]))
+
+        if f_primera >= BX:
+            raise ValueError(f'{valor:.0f}°: la resonancia está por DEBAJO de {campos[0]:.0f} Oe. '
+                             f'Aumentá margen_campo o revisá Ms.')
+
+        for i in range(1, len(matriz)):
+            if re(matriz[i][2]) >= BX:
+                H0, H1 = float(matriz[i-1][0]), float(matriz[i][0])
+                f0, f1 = float(re(matriz[i-1][2])), float(re(matriz[i][2]))
+                h_res = H0 + (BX - f0) * (H1 - H0) / (f1 - f0)
+
+                angulo_OP.append(valor)
+                ang_eq.append(float(matriz[i][3]))
+                Hr.append(h_res)
+                print(f'{valor:5.1f}°  Hr = {h_res:.1f} Oe   ángulo de M = {float(matriz[i][3]):.1f}°')
+                break
+        else:
+            raise ValueError(f'{valor:.0f}°: la resonancia está por ENCIMA de {campos[-1]:.0f} Oe '
+                             f'(f máx = {f_ultima/(2*np.pi)/1e9:.2f} GHz). '
+                             f'Aumentá margen_campo o revisá Ms.')
+
+    angulo_OP = np.array(angulo_OP)
+    ang_eq = np.array(ang_eq)
+    Hr = np.array(Hr)
+
+    # ==================================================
+    # GUARDAR (en la misma carpeta que el archivo experimental)
+    # ==================================================
+
+    carpeta = os.path.dirname(os.path.abspath(archivo))
+    nombre = f'output_angular_OP_teoria_magn{magn}'
+
+    np.savetxt(os.path.join(carpeta, nombre + '.txt'), np.column_stack((angulo_OP, ang_eq, Hr)),
+               delimiter=',', header='anguloH,anguloM,Hr', comments='')
+
+    # ==================================================
+    # GRÁFICA (el PDF se guarda siempre; la ventana solo si graficar=True)
+    # ==================================================
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+    ax.plot(angulo_OP, Hr, 'o--', label='Teoría', markersize=3)
+    ax.plot(angulo_exp - defasaje_deg, Hr_exp, 's', label='Experimento', markersize=4)
+    ax.set_xlabel('Ángulo (deg)')
+    ax.set_ylabel('Hr (Oe)')
+    ax.set_title('OP angular variation')
+    ax.legend()
+    ax.grid(True)
+    fig.savefig(os.path.join(carpeta, nombre + '.pdf'), bbox_inches='tight')
+
+    if graficar:
+        plt.show()
+    else:
+        plt.close(fig)
+
+    print(f'Tiempo: {time.time() - inicio:.1f} s')
+
+    return angulo_OP, ang_eq, Hr
+
 
 if __name__ == '__main__':
     # se ejecuta solo si corrés el archivo directamente, no cuando se importa
-    archivo = r"C:\Disco D\Study\Phd Bariloche\FeCoB\datos\output_2peak.txt"
+    archivo = r"C:\Disco D\Study\Phd Bariloche\FeCoB\datos\output_1peak.txt"
     variacion_angular_ip(archivo)
