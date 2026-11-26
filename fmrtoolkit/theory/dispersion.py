@@ -14,7 +14,8 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import minimize
-from sympy import I, Matrix, diff, lambdify, rad, sin, symbols
+from fmrtoolkit.theory.smit_beljers import matriz_1capa, matriz_2capas
+from sympy import lambdify, rad, symbols
 
 from fmrtoolkit.theory.free_energy import e_libre_IP_1L, e_libre_IP_2L
 
@@ -24,7 +25,7 @@ from fmrtoolkit.theory.free_energy import e_libre_IP_1L, e_libre_IP_2L
 # ==================================================
 
 def dispersion_1capa(magn=1300, g=2.015, damp=0.0026,
-                     Hc=250, Hu=0, ang_u=45, espesor=1e-7,
+                     Hc=250, Hu=0, ang_u=45,
                      ang_campo=0, campo_min=5, campo_max=4000, paso_campo=50,
                      paso_phi_M=0.01, carpeta='.', graficar=True):
     """
@@ -41,6 +42,7 @@ def dispersion_1capa(magn=1300, g=2.015, damp=0.0026,
 
     Devuelve campos (Oe), frecuencia (GHz) y ángulo de equilibrio de M (grados).
     """
+    
     inicio = time.time()
 
     # ==================================================
@@ -53,7 +55,6 @@ def dispersion_1capa(magn=1300, g=2.015, damp=0.0026,
     beta = float(rad(ang_u))          # eje fácil uniaxial en radianes
     Ku = magn*Hu/2
     Kc = magn*Hc/2
-    gamma = 8794000*g
 
     campos = np.arange(campo_min, campo_max, paso_campo)
 
@@ -64,17 +65,9 @@ def dispersion_1capa(magn=1300, g=2.015, damp=0.0026,
     # ENERGÍA, DERIVADAS Y MATRIZ
     # ==================================================
 
-    Elibre = e_libre_IP_1L(angazimut, angmagn, h, angcamp, espesor, magn, Kc, Ku, beta)
+    Elibre = e_libre_IP_1L(angazimut, angmagn, h, angcamp, magn, Kc, Ku, beta)
 
-    E_theta_phi = diff(Elibre, angazimut, angmagn)
-    E_theta_theta = diff(Elibre, angazimut, angazimut)
-    E_phi_phi = diff(Elibre, angmagn, angmagn)
-
-    tM, s = espesor*magn, sin(angazimut)
-    m = Matrix([[I*frec/gamma + E_theta_phi/(tM*s) + damp*E_theta_theta/tM,
-                 E_phi_phi/(tM*s**2) + damp*E_theta_phi/(tM*s)],
-                [-E_theta_theta/tM + damp*E_theta_phi/(tM*s),
-                 I*frec/gamma - E_theta_phi/(tM*s) + damp*E_phi_phi/(tM*s**2)]])
+    m = matriz_1capa(Elibre, angazimut, angmagn, frec, magn, g, damp=damp)
 
     # La matriz es m = frec*C + K, así que det(m) = 0 equivale a que frec sea
     # autovalor de -C^-1 K. Da las mismas raíces que resolver el determinante,
@@ -96,7 +89,7 @@ def dispersion_1capa(magn=1300, g=2.015, damp=0.0026,
         ang = ang_M_rad[np.argmin(Elibre_campo)]                # en radianes
 
         raices = np.linalg.eigvals(-C_inv @ np.array(K_num(ang, np.pi/2, campo), dtype=complex))
-        positivas = np.sort(raices.real[raices.real > 0]) / (2*np.pi*1e9)   # GHz
+        positivas = np.sort(raices.real[raices.real > 0]) / (2*np.pi*1e9)   # GHz pq pusiste esto en vez de estoo 
 
         freq.append(positivas[0] if len(positivas) > 0 else np.nan)
         ang_eq.append(np.rad2deg(ang))
@@ -139,7 +132,7 @@ def dispersion_1capa(magn=1300, g=2.015, damp=0.0026,
 def dispersion_2capas(magn_a=1300, magn_b=770, g_a=2.015, g_b=2.011,
                       damp_a=0.0026, damp_b=0.006,
                       Hc_a=250, Hc_b=250, Hu_a=0, Hu_b=0, ang_u=45,
-                      espesor_a=1e-6, espesor_b=1e-6, A=80,
+                      espesor_a=1e-6, espesor_b=1e-6, A=0.08,
                       ang_campo=0, campo_min=5, campo_max=4000, paso_campo=50,
                       paso_phi_M=2, carpeta='.', graficar=True):
     """
@@ -176,8 +169,6 @@ def dispersion_2capas(magn_a=1300, magn_b=770, g_a=2.015, g_b=2.011,
     Kc_a = magn_a*Hc_a/2
     Ku_b = magn_b*Hu_b/2
     Kc_b = magn_b*Hc_b/2
-    gamma1 = 8794000*g_a
-    gamma2 = 8794000*g_b
 
     campos = np.arange(campo_min, campo_max, paso_campo)
 
@@ -192,36 +183,8 @@ def dispersion_2capas(magn_a=1300, magn_b=770, g_a=2.015, g_b=2.011,
     Elibre = e_libre_IP_2L(angazimut_a, angmagn_a, angazimut_b, angmagn_b, h, angcamp,
                            magn_a, magn_b, Kc_a, Kc_b, Ku_a, Ku_b, beta, A, espesor_a, espesor_b)
 
-    E_theta1_phi1 = diff(Elibre, angazimut_a, angmagn_a)
-    E_theta1_phi2 = diff(Elibre, angazimut_a, angmagn_b)
-    E_theta1_theta1 = diff(Elibre, angazimut_a, angazimut_a)
-    E_phi1_phi1 = diff(Elibre, angmagn_a, angmagn_a)
-    E_theta2_phi2 = diff(Elibre, angazimut_b, angmagn_b)
-    E_theta2_phi1 = diff(Elibre, angazimut_b, angmagn_a)
-    E_theta2_theta1 = diff(Elibre, angazimut_b, angazimut_a)
-    E_theta2_theta2 = diff(Elibre, angazimut_b, angazimut_b)
-    E_phi2_phi2 = diff(Elibre, angmagn_b, angmagn_b)
-    E_phi1_phi2 = diff(Elibre, angmagn_a, angmagn_b)
-
-    Ma, ta, d1, sa = magn_a, espesor_a, damp_a, sin(angazimut_a)
-    Mb, tb, d2, sb = magn_b, espesor_b, damp_b, sin(angazimut_b)
-    m = Matrix([
-        [I*frec/gamma1 + E_theta1_phi1/(ta*Ma*sa) + d1*E_theta1_theta1/(ta*Ma),
-         E_phi1_phi1/(ta*Ma*sa**2) + d1*E_theta1_phi1/(ta*Ma*sa),
-         E_theta2_phi1/(ta*Mb*sa) + d1*E_theta2_theta1/(ta*Mb),
-         E_phi1_phi2/(ta*Mb*sa*sb) + d1*E_theta1_phi2/(ta*Mb*sb)],
-        [-E_theta1_theta1/(ta*Ma) + d1*E_theta1_phi1/(ta*Ma*sa),
-         I*frec/gamma1 - E_theta1_phi1/(ta*Ma*sa) + d1*E_phi1_phi1/(ta*Ma*sa**2),
-         -E_theta2_theta1/(ta*Mb) + d1*E_theta2_phi1/(ta*Mb*sa),
-         -E_theta1_phi2/(ta*Mb*sb) + d1*E_phi1_phi2/(ta*Mb*sb*sa)],
-        [E_theta1_phi2/(tb*Ma*sb) + d2*E_theta2_theta1/(tb*Ma),
-         E_phi1_phi2/(tb*Ma*sa*sb) + d2*E_theta2_phi1/(tb*Ma*sa),
-         I*frec/gamma2 + E_theta2_phi2/(tb*Mb*sb) + d2*E_theta2_theta2/(tb*Mb),
-         E_phi2_phi2/(tb*Mb*sb**2) + d2*E_theta2_phi2/(tb*Mb*sb)],
-        [-E_theta2_theta1/(tb*Ma) + d2*E_theta1_phi2/(tb*Ma*sb),
-         -E_theta2_phi1/(tb*Ma*sa) + d2*E_phi1_phi2/(tb*Ma*sa*sb),
-         -E_theta2_theta2/(tb*Mb) + d2*E_theta2_phi2/(tb*Mb*sb),
-         I*frec/gamma2 - E_theta2_phi2/(tb*Mb*sb) + d2*E_phi2_phi2/(tb*Mb*sb**2)]])
+    m = matriz_2capas(Elibre, angazimut_a, angmagn_a, angazimut_b, angmagn_b, frec,
+                  magn_a, magn_b, espesor_a, espesor_b, g_a, g_b, damp_a=damp_a, damp_b=damp_b)
 
     # m = frec*C + K: las frecuencias son los autovalores de -C^-1 K
     C_inv = np.linalg.inv(np.array(m.diff(frec).evalf(), dtype=complex))

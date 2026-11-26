@@ -9,14 +9,15 @@ import os
 import time
 
 import matplotlib.pyplot as plt
+from fmrtoolkit.theory.smit_beljers import matriz_1capa
 import numpy as np
-from sympy import I, Matrix, cos, diff, lambdify, pi, rad, re, sin, solve, symbols
+from sympy import lambdify, rad, re, symbols
 from fmrtoolkit.theory.free_energy import e_libre_IP_1L, e_libre_OP_1L
 
 
 def variacion_angular_ip(archivo,
                          Hu=20, Hc=175, magn=1155, ang_u=45, g=2.09,
-                         frecuencia=23.9e9, espesor=1e-7,
+                         frecuencia=23.9e9,
                          col_angulo=0, col_Hr=1, defasaje_deg=12,
                          margen_campo=400, paso_campo=20,
                          ang_inicio=0, ang_fin=185, paso_ang=5,
@@ -62,7 +63,7 @@ def variacion_angular_ip(archivo,
     beta = float(rad(ang_u))          # dirección del eje fácil uniaxial en radianes
     Ku = magn*Hu/2
     Kc = magn*Hc/2
-    gamma = 8794000*g
+
     BX = np.float64(2*np.pi*frecuencia)
 
     # Ángulo de M: se busca en toda la vuelta (0-360°) para que funcione con el campo > 180°
@@ -75,39 +76,29 @@ def variacion_angular_ip(archivo,
     for valor in np.arange(ang_inicio, ang_fin + paso_ang/2, paso_ang):
         angcamp = float(rad(valor))   # ángulo del campo en radianes
 
-        Elibre = e_libre_IP_1L(angazimut, angmagn, h, angcamp, espesor, magn, Kc, Ku, beta)
+        Elibre = e_libre_IP_1L(angazimut, angmagn, h, angcamp, magn, Kc, Ku, beta)
 
-        # Derivadas segundas
-        E_theta1_phi1 = diff(Elibre, angazimut, angmagn)
-        E_theta1_theta1 = diff(Elibre, angazimut, angazimut)
-        E_phi1_phi1 = diff(Elibre, angmagn, angmagn)
-
-        m = Matrix([[I*(frec/gamma) + E_theta1_phi1/(espesor*magn*sin(angazimut)),
-                     E_phi1_phi1/(espesor*magn*(sin(angazimut))**2)],
-                    [-E_theta1_theta1/(espesor*magn),
-                     I*(frec/gamma) - E_theta1_phi1/(espesor*magn*sin(angazimut))]])
-
+        m = matriz_1capa(Elibre, angazimut, angmagn, frec, magn, g, damp=0)
         # ==================================================
         # ÁNGULO DE EQUILIBRIO Y FRECUENCIA PARA CADA CAMPO
         # ==================================================
 
         lista_min = []
 
+        C_inv = np.linalg.inv(np.array(m.diff(frec).evalf(), dtype=complex))
+        K_num = lambdify((angmagn, angazimut, h), m.subs(frec, 0), 'numpy')
         energia_num = lambdify((angmagn, angazimut, h), Elibre, 'numpy')
 
         for campo in campos:
 
             Elibre_campo = energia_num(ang_Ma_rad, np.pi/2, campo)   # M en el plano, todos los ángulos
+            
+            ang_a = ang_Ma_rad[np.argmin(Elibre_campo)]
+            
+            raices = np.linalg.eigvals(-C_inv @ np.array(K_num(ang_a, np.pi/2, campo), dtype=complex))
+            omega = raices.real.max()          # la raíz de parte real positiva, en rad/s        
 
-            ang_a = ang_Ma_deg[np.argmin(Elibre_campo)]
-
-            m_eval = m.evalf(20, subs={angmagn: ang_a*np.pi/180, angazimut: np.pi/2, h: campo})
-
-            determinante = m_eval.det(method='berkowitz')
-
-            solucion = list(solve(determinante, frec))
-
-            lista_min.append([campo, valor, solucion[1], ang_a])
+            lista_min.append([campo,valor,omega])  
 
         matriz = np.array(lista_min)
 
@@ -243,61 +234,51 @@ def variacion_angular_op(archivo,
 
         Elibre = e_libre_OP_1L(angazimut, angmagn, h, angcamp, magn)
 
-        # Derivadas segundas
-        E_theta_phi = diff(Elibre, angazimut, angmagn)
-        E_theta_theta = diff(Elibre, angazimut, angazimut)
-        E_phi_phi = diff(Elibre, angmagn, angmagn)
-
-        m = Matrix([[I*(frec/gamma) + E_theta_phi/(magn*sin(angazimut)),
-                     E_phi_phi/(magn*(sin(angazimut))**2)],
-                    [-E_theta_theta/magn,
-                     I*(frec/gamma) - E_theta_phi/(magn*sin(angazimut))]])
-
+        m = matriz_1capa(Elibre, angazimut, angmagn, frec, magn, g, damp=0)
+        
         # ==================================================
         # ÁNGULO DE EQUILIBRIO Y FRECUENCIA PARA CADA CAMPO
         # ==================================================
 
         lista_min = []
 
+        C_inv = np.linalg.inv(np.array(m.diff(frec).evalf(), dtype=complex))
+        K_num = lambdify((angmagn, angazimut, h), m.subs(frec, 0), 'numpy')
         energia_num = lambdify((angmagn, angazimut, h), Elibre, 'numpy')
 
         for campo in campos:
 
-            Elibre_campo = energia_num(ang_M_rad, np.pi/2, campo)   # M en el plano x-normal, se barre φ
+            Elibre_campo = energia_num(ang_M_rad, np.pi/2, campo)   # M en el plano, todos los ángulos
+            
+            ang_a = ang_M_rad[np.argmin(Elibre_campo)]
+            
+            raices = np.linalg.eigvals(-C_inv @ np.array(K_num(ang_a, np.pi/2, campo), dtype=complex))
+            omega = raices.real.max()          # la raíz de parte real positiva, en rad/s        
 
-            ang_a = ang_M_deg[np.argmin(Elibre_campo)]
-
-            m_eval = m.evalf(20, subs={angmagn: ang_a*np.pi/180, angazimut: np.pi/2, h: campo})
-
-            determinante = m_eval.det(method='berkowitz')
-
-            solucion = list(solve(determinante, frec))
-
-            lista_min.append([campo, valor, solucion[1], ang_a])
-
+            lista_min.append([campo, omega, np.rad2deg(ang_a)])
         matriz = np.array(lista_min)
 
         # ==================================================
         # INTERPOLACIÓN LINEAL: campo donde la frecuencia cruza BX
         # ==================================================
 
-        f_primera = float(re(matriz[0][2]))
-        f_ultima = float(re(matriz[-1][2]))
+        f_primera = float(re(matriz[0][1]))
+        f_ultima = float(re(matriz[-1][1]))
 
         if f_primera >= BX:
             raise ValueError(f'{valor:.0f}°: la resonancia está por DEBAJO de {campos[0]:.0f} Oe. '
                              f'Aumentá margen_campo o revisá Ms.')
 
         for i in range(1, len(matriz)):
-            if re(matriz[i][2]) >= BX:
+            if re(matriz[i][1]) >= BX:
                 H0, H1 = float(matriz[i-1][0]), float(matriz[i][0])
-                f0, f1 = float(re(matriz[i-1][2])), float(re(matriz[i][2]))
+                f0, f1 = float(re(matriz[i-1][1])), float(re(matriz[i][1]))
                 h_res = H0 + (BX - f0) * (H1 - H0) / (f1 - f0)
 
                 angulo_OP.append(valor)
-                ang_eq.append(float(matriz[i][3]))
+                ang_eq.append(float(matriz[i][2]))
                 Hr.append(h_res)
-                print(f'{valor:5.1f}°  Hr = {h_res:.1f} Oe   ángulo de M = {float(matriz[i][3]):.1f}°')
+                print(f'{valor:5.1f}°  Hr = {h_res:.1f} Oe   ángulo de M = {float(matriz[i][2]):.1f}°')
                 break
         else:
             raise ValueError(f'{valor:.0f}°: la resonancia está por ENCIMA de {campos[-1]:.0f} Oe '
