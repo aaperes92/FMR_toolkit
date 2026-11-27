@@ -1,4 +1,8 @@
-"""Autovectores de una bicapa acoplada: precesión de M de cada capa en la resonancia.
+"""Autovectores: precesión de M en la resonancia, para una capa y para una bicapa acoplada.
+
+    autovectores_1capa(...)    monocapa (un modo)
+    autovectores_bicapa(...)   bicapa acoplada (modos acústico y óptico)
+
 
 Para cada modo (acústico y óptico) busca el campo de resonancia a la frecuencia de
 medición, calcula el equilibrio de las dos capas en ese campo y resuelve la respuesta
@@ -16,8 +20,8 @@ from scipy.optimize import minimize
 from sympy import lambdify, symbols
 
 from fmrtoolkit.theory.bilayer import campo_resonancia
-from fmrtoolkit.theory.free_energy import e_libre_IP_2L
-from fmrtoolkit.theory.smit_beljers import matriz_2capas
+from fmrtoolkit.theory.free_energy import e_libre_IP_1L, e_libre_IP_2L
+from fmrtoolkit.theory.smit_beljers import matriz_1capa, matriz_2capas
 
 NOMBRES_MODO = {'acustico': 'acústico', 'optico': 'óptico'}
 
@@ -294,7 +298,261 @@ def _graficar_dispersion(carpeta, A, frecuencia, resultado, graficar):
         plt.close(fig)
 
 
+# ##################################################################
+# UNA CAPA
+# ##################################################################
+
+def autovectores_1capa(magn=1700,
+                       Hc=250, Hu=250, ang_u=45,
+                       g=2.088, damp=0.0026,
+                       frecuencia=9.76e9, ang_campo=0, h_rf=1,
+                       campo_min=10, campo_max=1400, paso_campo=10,
+                       paso_phi_M=0.5, n_tiempos=51,
+                       carpeta='.', guardar_gif=True, graficar=True):
+    """
+    magn          : magnetización (emu/cm³)
+    Hc            : campo de anisotropía cúbica (Oe)
+    Hu            : campo de anisotropía uniaxial (Oe)
+    ang_u         : dirección del eje fácil uniaxial (grados)
+    g             : factor g
+    damp          : amortiguamiento de Gilbert
+    frecuencia    : frecuencia de medición (Hz)
+    ang_campo     : ángulo del campo en el plano (grados)
+    h_rf          : amplitud del campo de microondas (Oe)
+    campo_min, campo_max, paso_campo : campos de la relación de dispersión (Oe)
+    paso_phi_M    : paso en grados de la grilla inicial del equilibrio (después se refina)
+    n_tiempos     : instantes en un período de precesión (incluye t = 0 y t = T)
+    carpeta       : dónde se guardan los .txt, .png y .gif
+    guardar_gif   : si es False, no genera la animación
+    graficar      : si es False, guarda todo pero no abre ventanas
+
+    Devuelve un diccionario con:
+        'campos', 'f' : relación de dispersión (Oe, GHz)
+        'modo' : diccionario del modo, o None si no resuena en el rango. Tiene
+            'Hr' (Oe), 'ang_M' (equilibrio en Hr, grados),
+            'amplitudes' (complejas, normalizadas por Ms: m_theta, m_phi),
+            't_T' y 'serie' (parte real de cada componente en el tiempo, shape (n_tiempos, 2)).
+    """
+    inicio = time.time()
+
+    # ==================================================
+    # PARÁMETROS
+    # ==================================================
+
+    h, frec, angmagn, angazimut = symbols('h, frec, angmagn, angazimut')
+
+    angcamp = np.deg2rad(ang_campo)
+    beta = np.deg2rad(ang_u)
+    Ku, Kc = magn*Hu/2, magn*Hc/2
+    BX = 2*np.pi*frecuencia
+
+    campos = np.arange(campo_min, campo_max, paso_campo)
+
+    ang_M_rad = np.deg2rad(np.arange(0, 360, paso_phi_M))
+
+    # ==================================================
+    # ENERGÍA LIBRE
+    # ==================================================
+
+    Elibre = e_libre_IP_1L(angazimut, angmagn, h, angcamp, magn, Kc, Ku, beta)
+
+    energia_num = lambdify((angmagn, angazimut, h), Elibre, 'numpy')
+
+    # ==================================================
+    # MATRIZ SIN DAMPING (damp = 0): frecuencia del modo (relación de dispersión)
+    # ==================================================
+
+    m_sin_damping = matriz_1capa(Elibre, angazimut, angmagn, frec, magn, g, damp=0)
+
+    # m = frec*C + K: las frecuencias son los autovalores de -C^-1 K
+    C_inv = np.linalg.inv(np.array(m_sin_damping.diff(frec).evalf(), dtype=complex))
+    K_num = lambdify((angmagn, angazimut, h), m_sin_damping.subs(frec, 0), 'numpy')
+
+    # ==================================================
+    # MATRIZ CON DAMPING: respuesta forzada (autovector) en la resonancia
+    # ==================================================
+
+    m_con_damping = matriz_1capa(Elibre, angazimut, angmagn, frec, magn, g, damp=damp)
+
+    m_con_damping_num = lambdify((angmagn, angazimut, h, frec), m_con_damping, 'numpy')
+
+    def equilibrio(campo, x0=None):
+        """Ángulo de equilibrio de M en el plano (rad)."""
+        if x0 is None:                                     # grilla en toda la vuelta
+            E = energia_num(ang_M_rad, np.pi/2, campo)
+            x0 = ang_M_rad[np.argmin(E)]
+        E0 = energia_num(x0, np.pi/2, campo)
+        escala = abs(E0) if E0 != 0 else 1.0
+        res = minimize(lambda x: (energia_num(x[0], np.pi/2, campo) - E0) / escala,
+                       [x0], method='Nelder-Mead',
+                       options={'xatol': 1e-10, 'fatol': 1e-14, 'maxiter': 5000})
+        return res.x[0]                                    # un número, no un array
+
+    # ==================================================
+    # RELACIÓN DE DISPERSIÓN
+    # ==================================================
+
+    lista_min = []
+    for campo in campos:
+        ang = equilibrio(campo)
+        raices = np.linalg.eigvals(
+            -C_inv @ np.array(K_num(ang, np.pi/2, campo), dtype=complex))
+        positivas = raices.real[raices.real > 0]           # rad/s; una capa → un solo modo
+        f_modo = positivas.min() if len(positivas) > 0 else np.nan
+        lista_min.append([campo, f_modo, ang])
+    matriz = np.array(lista_min)
+
+    resultado = {'campos': campos, 'f': matriz[:, 1]/(2*np.pi*1e9)}
+
+    # ==================================================
+    # EL MODO: Hr, equilibrio en Hr y respuesta forzada
+    # ==================================================
+
+    t_T = np.linspace(0, 1, n_tiempos)                    # tiempo en períodos
+    Hr, i = campo_resonancia(matriz[:, 0], matriz[:, 1], BX)
+
+    if i is None:
+        print(f'El modo no se encuentra visible para esa frecuencia '
+              f'({frecuencia/1e9:g} GHz) entre {campos[0]:g} y {campos[-1]:g} Oe.')
+        resultado['modo'] = None
+    else:
+        # Equilibrio exactamente en Hr, partiendo del campo de la grilla más cercano
+        ang = equilibrio(Hr, x0=matriz[i, 2])
+
+        # Respuesta forzada: m(BX)·v = -d, con d el término de microondas.
+        # Variables: v = (M·dθ, M·sinθ·dφ)
+        M = np.array(m_con_damping_num(ang, np.pi/2, Hr, BX), dtype=complex)
+        d = np.array([0, magn*h_rf], dtype=complex)
+        v = np.linalg.solve(M, -d)
+        amp = v / magn                                      # normalizado por Ms
+
+        # Evolución temporal: m(t) = Re(amp·e^{iωt}), con ωt = 2π·t/T
+        fase = np.exp(1j*2*np.pi*t_T)[:, None]
+        serie_compleja = amp[None, :] * fase
+        serie = serie_compleja.real
+
+        resultado['modo'] = {'Hr': Hr,
+                             'ang_M': (np.rad2deg(ang) + 180) % 360 - 180,
+                             'amplitudes': amp, 't_T': t_T, 'serie': serie}
+        print(f'Hr = {Hr:.1f} Oe, M a {resultado["modo"]["ang_M"]:.1f}°')
+
+        _guardar_txt_1capa(carpeta, magn, Hr, t_T, serie_compleja)
+        _graficar_componentes_1capa(carpeta, magn, Hr, t_T, serie, graficar)
+        _graficar_elipse_1capa(carpeta, magn, Hr, serie, graficar)
+        if guardar_gif:
+            _animar_elipse_1capa(carpeta, magn, t_T, serie)
+
+    _graficar_dispersion_1capa(carpeta, magn, frecuencia, resultado, graficar)
+
+    if graficar:
+        plt.show()
+
+    print(f'Tiempo: {time.time() - inicio:.1f} s')
+    return resultado
+
+
+# ==================================================
+# FUNCIONES AUXILIARES DE UNA CAPA (guardar y graficar)
+# ==================================================
+
+def _guardar_txt_1capa(carpeta, magn, Hr, t_T, serie_compleja):
+    th, ph = serie_compleja.T
+    mod = np.abs(serie_compleja)                       # módulos (constantes en el tiempo)
+    area = np.pi*mod[:, 0]*mod[:, 1]
+    datos = np.column_stack((t_T, th.real, th.imag, ph.real, ph.imag,
+                             area, mod[:, 0]/mod[:, 1], mod, np.full_like(t_T, Hr)))
+    np.savetxt(os.path.join(carpeta, f'autovectores_1capa_M{magn:g}.txt'), datos, delimiter=',',
+               header='t/T, m_theta_re, m_theta_im, m_phi_re, m_phi_im, area, elipt, '
+                      'm_theta_modulus, m_phi_modulus, Hr',
+               comments='')
+
+
+def _graficar_componentes_1capa(carpeta, magn, Hr, t_T, serie, graficar):
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(7, 8), sharex=True)
+    ax1.plot(t_T, serie[:, 1], 'o--', color='r', label=r'm$_{\varphi}$', markersize=3)
+    ax1.set_ylabel(r'm$_{\varphi}$/M$_s$')
+    ax1.set_title(f'Una capa, M = {magn:g} emu/cm$^3$, H$_r$ = {Hr:.0f} Oe\n'
+                  'Componente dinámica en el plano')
+    ax2.plot(t_T, serie[:, 0], 'o--', color='r', label=r'm$_{\theta}$', markersize=3)
+    ax2.set_ylabel(r'm$_{\theta}$/M$_s$')
+    ax2.set_title('Componente dinámica fuera del plano')
+    ax2.set_xlabel('t/T')
+    for ax in (ax1, ax2):
+        ax.axhline(0, color='k', lw=0.8)
+        ax.legend()
+        ax.grid(True)
+    fig.savefig(os.path.join(carpeta, f'componentes_1capa_M{magn:g}.png'), dpi=300,
+                bbox_inches='tight')
+    if not graficar:
+        plt.close(fig)
+
+
+def _graficar_elipse_1capa(carpeta, magn, Hr, serie, graficar):
+    th, ph = serie.T
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.plot(th, ph, '-', color='r')
+    ax.plot(th[0], ph[0], 'o', color='r')                           # t = 0
+    ax.annotate('', xy=(th[3], ph[3]), xytext=(th[0], ph[0]),       # sentido de giro
+                arrowprops=dict(arrowstyle='->', color='r', lw=2))
+    ax.axhline(0, color='k', lw=0.5)
+    ax.axvline(0, color='k', lw=0.5)
+    ax.set_aspect('equal')
+    ax.set_xlabel(r'$m_{\theta}/M_s$ (fuera del plano)')
+    ax.set_ylabel(r'$m_{\varphi}/M_s$ (en el plano)')
+    ax.set_title(f'Una capa, M = {magn:g} emu/cm$^3$, H$_r$ = {Hr:.0f} Oe')
+    ax.grid(True)
+    fig.savefig(os.path.join(carpeta, f'elipse_1capa_M{magn:g}.png'), dpi=300,
+                bbox_inches='tight')
+    if not graficar:
+        plt.close(fig)
+
+
+def _animar_elipse_1capa(carpeta, magn, t_T, serie):
+    th, ph = serie.T
+    fig, ax = plt.subplots(figsize=(6, 6))
+    lim = 1.15*np.abs(serie).max()
+    ax.set_xlim(-lim, lim)
+    ax.set_ylim(-lim, lim)
+    ax.set_aspect('equal')
+    ax.set_xlabel(r'$m_{\theta}/M_s$')
+    ax.set_ylabel(r'$m_{\varphi}/M_s$')
+    ax.grid(True)
+    ax.plot(th, ph, ':', color='r', alpha=0.4)                  # elipse completa de fondo
+    tray, = ax.plot([], [], '-', color='r', lw=2)
+    punto, = ax.plot([], [], 'o', color='r')
+
+    def update(k):
+        tray.set_data(th[:k+1], ph[:k+1])
+        punto.set_data([th[k]], [ph[k]])
+        ax.set_title(f'Una capa, t/T = {t_T[k]:.2f}')
+        return tray, punto
+
+    ani = FuncAnimation(fig, update, frames=len(t_T), interval=100, blit=False)
+    ani.save(os.path.join(carpeta, f'precesion_1capa_M{magn:g}.gif'), writer='pillow', fps=10)
+    plt.close(fig)                                    # el GIF ya quedó guardado
+
+
+def _graficar_dispersion_1capa(carpeta, magn, frecuencia, resultado, graficar):
+    fig, ax = plt.subplots(figsize=(7, 5))
+    ax.plot(resultado['campos'], resultado['f'], 'o--', label='Modo', markersize=3)
+    ax.axhline(frecuencia/1e9, color='red', linestyle='--', linewidth=2,
+               label=f'{frecuencia/1e9:g} GHz')
+    if resultado['modo'] is not None:
+        ax.plot(resultado['modo']['Hr'], frecuencia/1e9, 'o', color='k', markersize=8,
+                mfc='none', mew=2)
+    ax.set_xlabel('Campo (Oe)')
+    ax.set_ylabel('Frecuencia (GHz)')
+    ax.set_title(f'Relación de dispersión, una capa, M = {magn:g} emu/cm$^3$')
+    ax.legend()
+    ax.grid(True)
+    fig.savefig(os.path.join(carpeta, f'dispersion_1capa_M{magn:g}.png'), dpi=300,
+                bbox_inches='tight')
+    if not graficar:
+        plt.close(fig)
+
+
 if __name__ == '__main__':
-    # se ejecuta solo si corrés el archivo directamente, no cuando se importa
+    # Ejemplo de uso. Los parámetros que no se pasan toman el valor por defecto del def.
     carpeta = r'C:\Disco D\Study\Phd Bariloche\FMR'
     autovectores_bicapa(A=0.4, carpeta=carpeta)
+    # autovectores_1capa(carpeta=carpeta)
