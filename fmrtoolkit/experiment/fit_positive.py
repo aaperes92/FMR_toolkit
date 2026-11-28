@@ -15,9 +15,22 @@ MODELOS = {1: lz.una_lorentziana, 2: lz.dos_lorentzianas}
 FWHM_A_PP = 1 / np.sqrt(3)
 
 
-def ajustar_carpeta(carpeta, n_lineas=2, ventana=300, graficar=True, extensiones=('.dat', '.txt')):
+def ajustar_carpeta(carpeta, n_lineas=2, ventana=300, graficar=True, extensiones=('.dat', '.txt'),
+                    carpeta_salida=None, figuras=None):
+    """
+    carpeta        : carpeta con los espectros
+    n_lineas       : 1 o 2 líneas por espectro
+    ventana        : semiancho (Oe) de la zona que pertenece a una misma línea
+    graficar       : True -> muestra una figura por espectro
+    extensiones    : extensiones de archivo que se leen
+    carpeta_salida : dónde se guardan fit_*.txt y output_*peak.txt. None -> en `carpeta`
+    figuras        : lista opcional; si se pasa, se le agrega la figura de cada espectro
+                     (sin cerrarla), aunque graficar sea False
+    """
     modelo = MODELOS[n_lineas]
     filas = []
+    salida = carpeta if carpeta_salida is None else carpeta_salida
+    os.makedirs(salida, exist_ok=True)
 
     for archivo in os.listdir(carpeta):
         if not archivo.lower().endswith(extensiones):
@@ -67,8 +80,8 @@ def ajustar_carpeta(carpeta, n_lineas=2, ventana=300, graficar=True, extensiones
         fondo_fit = y0_fit + m_fit * campo_fit
         curvas_lineas = [fondo_fit + lz.lorentziana(campo_fit, 0, *linea) for linea in lineas]
 
-        if graficar:
-            plt.figure(figsize=(7, 5))
+        if graficar or figuras is not None:
+            fig = plt.figure(figsize=(7, 5))
             plt.plot(campo, intensidad, 'o', label='Datos', markersize=3)
             plt.plot(campo_fit, intensidad_fit, '-', label='Ajuste (suma)')
             for i, (curva, linea) in enumerate(zip(curvas_lineas, lineas), start=1):
@@ -79,10 +92,13 @@ def ajustar_carpeta(carpeta, n_lineas=2, ventana=300, graficar=True, extensiones
             plt.title(f'Ajuste para {archivo}')
             plt.legend()
             plt.grid(True)
-            plt.show()
+            if figuras is not None:
+                figuras.append(fig)
+            if graficar:
+                plt.show()
 
         # Curva ajustada de este archivo
-        output_fit = os.path.join(carpeta, f'fit_{nombre_sin_extension}.txt')
+        output_fit = os.path.join(salida, f'fit_{nombre_sin_extension}.txt')
         encabezado = 'H, Voltage, ' + ', '.join(f'Linea{i}' for i in range(1, n_lineas + 1)) + ', Fondo'
         np.savetxt(output_fit, np.column_stack((campo_fit, intensidad_fit, *curvas_lineas, fondo_fit)),
                    delimiter=',', header=encabezado, comments='')
@@ -105,7 +121,7 @@ def ajustar_carpeta(carpeta, n_lineas=2, ventana=300, graficar=True, extensiones
                 + [c for i in nums for c in (f'Hr{i}', f'Ancho de linea{i} pico-pico')]
                 + [c for i in nums for c in (f'err_Hr{i}', f'err_Ancho{i}')]
                 + [f'phi{i}' for i in nums])
-    output_file = os.path.join(carpeta, f'output_{n_lineas}peak.txt')
+    output_file = os.path.join(salida, f'output_{n_lineas}peak.txt')
     np.savetxt(output_file, datos, delimiter=',', header=', '.join(columnas), comments='')
 
     return datos

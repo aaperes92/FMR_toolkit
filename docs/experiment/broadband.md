@@ -15,7 +15,7 @@ res = ajustar_banda_ancha("path/to/spectra/output_1peak.txt",
 print(res["g"], res["M_eff"], res["damping"])     # each entry is (value, error)
 ```
 
-## `ajustar_banda_ancha(archivo, col_Hr=1, col_ancho=2, eje_facil=True, ajustar_Hu=False, H_uniaxial=0.0, H_cubico=0.0, g_limites=(2.0, 2.2), graficar=True)`
+## `ajustar_banda_ancha(archivo, col_Hr=1, col_ancho=2, eje_facil=True, ajustar_Hu=False, H_uniaxial=0.0, H_cubico=0.0, g_limites=(2.0, 2.2), graficar=True, carpeta_salida=None, figuras=None)`
 
 ### Parameters
 
@@ -30,6 +30,8 @@ print(res["g"], res["M_eff"], res["damping"])     # each entry is (value, error)
 | `H_cubico` | `0.0` | Oe | Cubic anisotropy field, always fixed |
 | `g_limites` | `(2.0, 2.2)` | — | Allowed range for g |
 | `graficar` | `True` | — | Show the figures (the PDFs are saved anyway) |
+| `carpeta_salida` | `None` | — | Folder for the output files. `None` writes them into the folder of `archivo`, as before |
+| `figuras` | `None` | — | Optional list. If given, every figure the function creates is appended to it and **not closed**, even with `graficar=False` (used by the GUI to show the plots). `None` keeps the previous behaviour |
 
 Rows with `nan` in the frequency, Hr or linewidth are discarded.
 
@@ -65,7 +67,7 @@ A dictionary; each entry is a tuple `(value, error)`:
 A warning is printed if g ends at one of the limits of `g_limites` (the fit is forced
 and its error is not reliable).
 
-### Output files (in the folder of `archivo`)
+### Output files (in the folder of `archivo`, or in `carpeta_salida` if given)
 
 | File | Content |
 |---|---|

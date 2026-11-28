@@ -11,7 +11,7 @@ from fmrtoolkit.experiment import fit_bipolar
 tabla = fit_bipolar.ajustar_carpeta("path/to/spectra")
 ```
 
-## `ajustar_carpeta(carpeta, graficar=True, extensiones=('.dat', '.txt'), skiprows=1)`
+## `ajustar_carpeta(carpeta, graficar=True, extensiones=('.dat', '.txt'), skiprows=1, carpeta_salida=None, figuras=None)`
 
 ### Parameters
 
@@ -21,6 +21,8 @@ tabla = fit_bipolar.ajustar_carpeta("path/to/spectra")
 | `graficar` | `True` | Show the figure of each spectrum (the PDF is saved anyway) |
 | `extensiones` | `('.dat', '.txt')` | File extensions that are read |
 | `skiprows` | `1` | Header lines to skip in each spectrum |
+| `carpeta_salida` | `None` | Folder for the PDFs and `output_bipolar.txt`. `None` writes them into `carpeta`, as before |
+| `figuras` | `None` | Optional list. If given, the figure of each spectrum is appended to it and not closed. `None` keeps the previous behaviour |
 
 ### Procedure
 
@@ -43,7 +45,7 @@ message is printed). See [Conventions](../conventions.md#input-spectra).
 A NumPy array with the columns of `output_bipolar.txt`, sorted by frequency, or `None`
 if no file was fitted.
 
-### Output files (in `carpeta`)
+### Output files (in `carpeta`, or in `carpeta_salida` if given)
 
 **`output_bipolar.txt`**
 

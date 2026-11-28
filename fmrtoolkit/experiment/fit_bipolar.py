@@ -48,7 +48,19 @@ def ajustar_rama(campo, intensidad):
     return popt, Res_field, Linewidth
 
 
-def ajustar_carpeta(carpeta, graficar=True, extensiones=('.dat', '.txt'), skiprows=1):
+def ajustar_carpeta(carpeta, graficar=True, extensiones=('.dat', '.txt'), skiprows=1,
+                    carpeta_salida=None, figuras=None):
+    """
+    carpeta        : carpeta con los espectros (barrido -H -> +H)
+    graficar       : True -> muestra la figura de cada espectro (el PDF se guarda siempre)
+    extensiones    : extensiones de archivo que se leen
+    skiprows       : líneas de encabezado de cada espectro
+    carpeta_salida : dónde se guardan los PDF y output_bipolar.txt. None -> en `carpeta`
+    figuras        : lista opcional; si se pasa, se le agrega la figura de cada espectro
+                     y no se cierra
+    """
+    salida = carpeta if carpeta_salida is None else carpeta_salida
+    os.makedirs(salida, exist_ok=True)
 
     Frecuencia = []
 
@@ -139,7 +151,7 @@ def ajustar_carpeta(carpeta, graficar=True, extensiones=('.dat', '.txt'), skipro
         # GRAFICA (el PDF se guarda siempre; la ventana solo si graficar=True)
         # ==================================================
 
-        plt.figure(figsize=(7, 5))
+        fig = plt.figure(figsize=(7, 5))
 
         plt.plot(campo, intensidad, 'o', label='Data', markersize=4)
         plt.plot(campo_fit_neg, intensidad_fit_neg, '-', linewidth=2, label='Negative field fit')
@@ -151,13 +163,15 @@ def ajustar_carpeta(carpeta, graficar=True, extensiones=('.dat', '.txt'), skipro
         plt.legend()
         plt.grid(True)
 
-        ruta_pdf = os.path.join(carpeta, f'{nombre_sin_extension}_fit.pdf')
+        ruta_pdf = os.path.join(salida, f'{nombre_sin_extension}_fit.pdf')
         plt.savefig(ruta_pdf, format='pdf', bbox_inches='tight')
 
+        if figuras is not None:
+            figuras.append(fig)
         if graficar:
             plt.show()
-        else:
-            plt.close()
+        elif figuras is None:
+            plt.close(fig)
 
         # ==================================================
         # GUARDAR RESULTADOS
@@ -203,7 +217,7 @@ def ajustar_carpeta(carpeta, graficar=True, extensiones=('.dat', '.txt'), skipro
 
     data = data[data[:, 0].argsort()]
 
-    output_file = os.path.join(carpeta, 'output_bipolar.txt')
+    output_file = os.path.join(salida, 'output_bipolar.txt')
 
     np.savetxt(
         output_file,

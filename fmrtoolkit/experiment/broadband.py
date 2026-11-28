@@ -15,7 +15,8 @@ from fmrtoolkit.core.fitting import estimar_p0_ancho, estimar_p0_kittel
 
 def ajustar_banda_ancha(archivo, col_Hr=1, col_ancho=2, eje_facil=True,
                         ajustar_Hu=False, H_uniaxial=0.0, H_cubico=0.0,
-                        g_limites=(2.0, 2.2), graficar=True):
+                        g_limites=(2.0, 2.2), graficar=True,
+                        carpeta_salida=None, figuras=None):
     """
     archivo     : output_*.txt generado por fit_positive o fit_bipolar
     col_Hr      : columna de Hr (la 0 es la frecuencia)
@@ -23,6 +24,10 @@ def ajustar_banda_ancha(archivo, col_Hr=1, col_ancho=2, eje_facil=True,
     ajustar_Hu  : True -> ajusta H_uniaxial ; False -> lo deja fijo en el valor dado
     H_cubico    : siempre fijo (en el eje fácil no se distingue de H_uniaxial)
     g_limites   : (g_min, g_max) rango permitido para g; por defecto (2.0, 2.2)
+    graficar    : True -> muestra las figuras (los PDF se guardan siempre)
+    carpeta_salida : dónde se guardan los PDF y output_broadband.txt.
+                     None -> en la carpeta de `archivo`
+    figuras     : lista opcional; si se pasa, se le agregan las dos figuras y no se cierran
     """
 
     # ==================================================
@@ -96,7 +101,8 @@ def ajustar_banda_ancha(archivo, col_Hr=1, col_ancho=2, eje_facil=True,
     # GRAFICA (los PDF se guardan siempre; la ventana solo si graficar=True)
     # ==================================================
 
-    carpeta = os.path.dirname(os.path.abspath(archivo))
+    carpeta = os.path.dirname(os.path.abspath(archivo)) if carpeta_salida is None else carpeta_salida
+    os.makedirs(carpeta, exist_ok=True)
 
     H_plot = np.linspace(Hr.min(), Hr.max(), 300)
     f_plot = np.linspace(f.min(), f.max(), 300)
@@ -121,9 +127,11 @@ def ajustar_banda_ancha(archivo, col_Hr=1, col_ancho=2, eje_facil=True,
     ax2.grid(True)
     fig2.savefig(os.path.join(carpeta, 'damping_fit.pdf'), bbox_inches='tight')
 
+    if figuras is not None:
+        figuras.extend([fig1, fig2])
     if graficar:
         plt.show()
-    else:
+    elif figuras is None:
         plt.close(fig1)
         plt.close(fig2)
 
