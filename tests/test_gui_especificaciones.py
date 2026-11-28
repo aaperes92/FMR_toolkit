@@ -96,6 +96,30 @@ class TestEspecificaciones(unittest.TestCase):
                         self.assertEqual(valores[p.nombre], esperado)
 
 
+try:
+    import tkinter  # noqa: F401
+    HAY_TKINTER = True
+except ImportError:
+    HAY_TKINTER = False
+
+
+@unittest.skipUnless(HAY_TKINTER, 'tkinter no está instalado en este Python')
+class TestImportarInterfaz(unittest.TestCase):
+
+    def test_modulos_de_la_interfaz_importan(self):
+        import importlib
+        for modulo in ('app', 'formulario', 'widgets', 'resultados', 'graficos', 'dialogos'):
+            with self.subTest(modulo=modulo):
+                importlib.import_module(f'fmrtoolkit.gui.{modulo}')
+
+
+class TestGraficos(unittest.TestCase):
+
+    def test_texto_plano_de_titulos(self):
+        from fmrtoolkit.gui.conversion import texto_plano
+        self.assertEqual(texto_plano('A = 0.4 erg/cm$^2$, H$_r$ = 705 Oe'), 'A = 0.4 erg/cm2, Hr = 705 Oe')
+
+
 class TestTextos(unittest.TestCase):
 
     def test_es_y_en_tienen_las_mismas_claves(self):

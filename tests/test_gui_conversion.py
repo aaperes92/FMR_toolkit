@@ -41,6 +41,14 @@ class TestLectura(unittest.TestCase):
         self.assertEqual(cv.leer_texto(' 2.09 ', p), 2.09)
         self.assertEqual(cv.leer_texto('1e3', p), 1000.0)
 
+    def test_entero_escrito_en_campo_real_queda_entero(self):
+        """Así los nombres de archivo (p. ej. 'magn1155_eje45') son los mismos que desde un script."""
+        p = Parametro('magn', 'material')
+        self.assertIsInstance(cv.leer_texto('1155', p), int)
+        self.assertIsInstance(cv.leer_texto('1155.0', p), float)
+        self.assertEqual(f"magn{cv.leer_texto('1155', p)}", 'magn1155')
+        self.assertAlmostEqual(cv.a_funcion(cv.leer_texto('10', FREC), FREC), 1e10)
+
     def test_real_invalido(self):
         p = Parametro('g', 'material')
         for texto, clave in (('', 'vacio'), ('abc', 'no_numero'), ('nan', 'no_numero'), ('inf', 'no_numero')):

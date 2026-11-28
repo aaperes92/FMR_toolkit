@@ -22,7 +22,7 @@ def version_fmrtoolkit():
     try:
         return importlib.metadata.version('fmrtoolkit')
     except importlib.metadata.PackageNotFoundError:
-        return 'desconocida (no instalado con pip)'
+        return 'unknown (not installed with pip)'
 
 
 def commit_git():
@@ -32,13 +32,13 @@ def commit_git():
         commit = subprocess.run(['git', '-C', str(carpeta), 'rev-parse', '--short', 'HEAD'],
                                 capture_output=True, text=True, timeout=3)
         if commit.returncode != 0:
-            return 'desconocido'
+            return 'unknown'
         cambios = subprocess.run(['git', '-C', str(carpeta), 'status', '--porcelain', '--untracked-files=no'],
                                  capture_output=True, text=True, timeout=3)
-        sucio = ' (+ cambios locales)' if cambios.stdout.strip() else ''
+        sucio = ' (+ local changes)' if cambios.stdout.strip() else ''
         return commit.stdout.strip() + sucio
     except (OSError, subprocess.SubprocessError):
-        return 'desconocido'
+        return 'unknown'
 
 
 def info_entorno():
@@ -46,12 +46,12 @@ def info_entorno():
     info = {'fmrtoolkit': version_fmrtoolkit(),
             'commit': commit_git(),
             'python': sys.version.split()[0],
-            'sistema': platform.platform()}
+            'os': platform.platform()}
     for modulo in ('numpy', 'scipy', 'sympy', 'matplotlib'):
         try:
             info[modulo] = __import__(modulo).__version__
         except Exception:                      # noqa: BLE001 - solo es informativo
-            info[modulo] = 'no disponible'
+            info[modulo] = 'not available'
     return info
 
 

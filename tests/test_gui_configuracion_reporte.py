@@ -70,7 +70,7 @@ class TestConfiguracion(unittest.TestCase):
 
 class TestReporte(unittest.TestCase):
 
-    ENTORNO = {'fmrtoolkit': '0.1.0', 'commit': 'abc123', 'python': '3.12', 'sistema': 'Test'}
+    ENTORNO = {'fmrtoolkit': '0.1.0', 'commit': 'abc123', 'python': '3.12', 'os': 'Test'}
 
     def setUp(self):
         self.textos = Textos('es')
@@ -93,7 +93,7 @@ class TestReporte(unittest.TestCase):
 
     def test_info_entorno_tiene_versiones(self):
         info = reporte.info_entorno()
-        for clave in ('fmrtoolkit', 'commit', 'python', 'sistema', 'numpy', 'scipy', 'sympy', 'matplotlib'):
+        for clave in ('fmrtoolkit', 'commit', 'python', 'os', 'numpy', 'scipy', 'sympy', 'matplotlib'):
             self.assertIn(clave, info)
 
     def test_mailto_codificado(self):

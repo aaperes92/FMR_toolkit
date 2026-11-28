@@ -10,6 +10,7 @@ texto de "errores" en los JSON de idioma. Este módulo no importa tkinter.
 """
 
 import math
+import re
 
 
 class ErrorValidacion(ValueError):
@@ -24,10 +25,14 @@ class ErrorValidacion(ValueError):
 # ==================================================
 
 def _real(texto):
-    """Acepta coma o punto decimal: '9,76' o '9.76'."""
+    """Acepta coma o punto decimal: '9,76' o '9.76'. Un número sin decimales ('1155')
+    se devuelve como int, igual que el valor por defecto de la firma: así los nombres de
+    archivo que arman las funciones (p. ej. 'magn1155') quedan iguales que desde un script."""
     t = str(texto).strip().replace(',', '.')
     if not t:
         raise ErrorValidacion('vacio')
+    if re.fullmatch(r'[+-]?\d+', t):
+        return int(t)
     try:
         valor = float(t)
     except ValueError:
@@ -176,3 +181,10 @@ def advertencias_activas(variante, tecnica, valores):
         except (KeyError, TypeError):            # todavía faltan valores válidos
             pass
     return claves
+
+
+def texto_plano(texto):
+    """Saca el formato matemático de matplotlib: 'erg/cm$^2$, H$_r$' -> 'erg/cm2, Hr'."""
+    for caracter in ('$', '^', '_', '{', '}', '\\'):
+        texto = texto.replace(caracter, '')
+    return texto.replace('\n', ' · ').strip()

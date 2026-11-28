@@ -11,17 +11,32 @@ from tkinter import ttk
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
+from fmrtoolkit.gui.conversion import texto_plano
+
 
 def nombre_figura(figura, numero, textos):
-    """Título de la figura (el del eje o el suptitle) para la lista."""
+    """Título de la figura (el suptitle o el del primer eje que tenga) para la lista."""
     suptitulo = getattr(figura, '_suptitle', None)
     if suptitulo is not None and suptitulo.get_text():
-        return suptitulo.get_text()
+        return texto_plano(suptitulo.get_text())
     for eje in figura.axes:
         titulo = eje.get_title()
         if titulo:
-            return titulo.replace('\n', ' · ')
+            return texto_plano(titulo)
     return textos.t('graficos.figura', n=numero)
+
+
+def _acomodar_al_tamano(figura):
+    """La ventana puede ser más chica que la figura original: con 'constrained layout'
+    matplotlib reacomoda títulos y etiquetas cada vez que cambia el tamaño. Solo afecta
+    lo que se ve en pantalla (los archivos ya se guardaron antes)."""
+    try:
+        figura.set_layout_engine('constrained')
+    except (AttributeError, ValueError, RuntimeError):     # matplotlib viejo o figura con colorbar
+        try:
+            figura.set_tight_layout(True)
+        except Exception:                                   # noqa: BLE001
+            pass
 
 
 class VisorFiguras(tk.Toplevel):
@@ -82,6 +97,7 @@ class VisorFiguras(tk.Toplevel):
             if widget is not None:
                 widget.destroy()
         figura = self.figuras[self.indice]
+        _acomodar_al_tamano(figura)
         self.canvas = FigureCanvasTkAgg(figura, master=self.zona)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill='both', expand=True)
