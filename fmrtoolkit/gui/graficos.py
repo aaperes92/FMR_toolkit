@@ -23,6 +23,9 @@ def nombre_figura(figura, numero, textos):
         titulo = eje.get_title()
         if titulo:
             return texto_plano(titulo)
+    if figura.axes and figura.axes[0].get_xlabel() and figura.axes[0].get_ylabel():
+        eje = figura.axes[0]                    # sin título: "y vs x", p. ej. "f (GHz) vs Hr (Oe)"
+        return f'{texto_plano(eje.get_ylabel())} vs {texto_plano(eje.get_xlabel())}'
     return textos.t('graficos.figura', n=numero)
 
 
