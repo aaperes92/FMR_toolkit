@@ -1,3 +1,49 @@
+# ==================================================
+# Python
+# ==================================================
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+
+# Instalación (pip install -e . crea fmrtoolkit.egg-info/ en la raíz)
+*.egg-info/
+build/
+dist/
+
+# ==================================================
+# Entornos virtuales
+# ==================================================
+venv/
+.venv/
+env/
+
+# ==================================================
+# Editores y sistema operativo
+# ==================================================
+.spyproject/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ==================================================
+# Datos de medición y resultados generados (no van al repo)
+# ==================================================
+*.dat
+*.pdf
+*.png
+*.gif
+
+# experiment
+output_*.txt
+fit_*.txt
+
+# theory
+Dispersion_*.txt
+autovectores_*.txt
+
+# ==================================================
+# Excepciones: archivos que SÍ queremos subir
+# ==================================================
+!examples/data/**
+!docs/**
