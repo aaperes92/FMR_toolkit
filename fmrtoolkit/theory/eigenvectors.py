@@ -32,7 +32,7 @@ def autovectores_bicapa(magn_a=1700, magn_b=770, espesor_a=10e-7, espesor_b=5e-7
                         A=0.4, frecuencia=9.76e9, ang_campo=0, h_rf=1,
                         campo_min=10, campo_max=1400, paso_campo=10,
                         paso_phi_M=2, n_tiempos=51,
-                        carpeta='.', guardar_gif=True, graficar=True):
+                        carpeta='.', guardar_gif=True, graficar=True, figuras=None):
     """
     magn_a, magn_b       : magnetización de cada capa (emu/cm³)
     espesor_a, espesor_b : espesor de cada capa (cm)
@@ -51,6 +51,8 @@ def autovectores_bicapa(magn_a=1700, magn_b=770, espesor_a=10e-7, espesor_b=5e-7
     carpeta              : dónde se guardan los .txt, .png y .gif
     guardar_gif          : si es False, no genera la animación
     graficar             : si es False, guarda todo pero no abre ventanas
+    figuras              : lista opcional; si se pasa, se le agregan las figuras (no el GIF)
+                           y no se cierran
 
     Devuelve un diccionario con:
         'campos', 'f_acustico', 'f_optico' : relación de dispersión (Oe, GHz)
@@ -167,12 +169,12 @@ def autovectores_bicapa(magn_a=1700, magn_b=770, espesor_a=10e-7, espesor_b=5e-7
               f'M_a a {resultado[modo]["ang_a"]:.1f}°, M_b a {resultado[modo]["ang_b"]:.1f}°')
 
         _guardar_txt(carpeta, modo, A, Hr, t_T, serie_compleja)
-        _graficar_componentes(carpeta, modo, A, Hr, t_T, serie, graficar)
-        _graficar_elipses(carpeta, modo, A, Hr, serie, graficar)
+        _graficar_componentes(carpeta, modo, A, Hr, t_T, serie, graficar, figuras)
+        _graficar_elipses(carpeta, modo, A, Hr, serie, graficar, figuras)
         if guardar_gif:
             _animar_elipses(carpeta, modo, A, t_T, serie, graficar)
 
-    _graficar_dispersion(carpeta, A, frecuencia, resultado, graficar)
+    _graficar_dispersion(carpeta, A, frecuencia, resultado, graficar, figuras)
 
     if graficar:
         plt.show()
@@ -202,7 +204,7 @@ def _guardar_txt(carpeta, modo, A, Hr, t_T, serie_compleja):
                comments='')
 
 
-def _graficar_componentes(carpeta, modo, A, Hr, t_T, serie, graficar):
+def _graficar_componentes(carpeta, modo, A, Hr, t_T, serie, graficar, figuras=None):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(7, 8), sharex=True)
     ax1.plot(t_T, serie[:, 1], 'o--', color='r', label=r'm$_{\varphi_1}$', markersize=3)
     ax1.plot(t_T, serie[:, 3], 's', color='b', label=r'm$_{\varphi_2}$', markersize=3)
@@ -220,11 +222,13 @@ def _graficar_componentes(carpeta, modo, A, Hr, t_T, serie, graficar):
         ax.grid(True)
     fig.savefig(os.path.join(carpeta, f'componentes_{modo}_A{A:g}.png'), dpi=300,
                 bbox_inches='tight')
-    if not graficar:
+    if figuras is not None:
+        figuras.append(fig)
+    elif not graficar:
         plt.close(fig)
 
 
-def _graficar_elipses(carpeta, modo, A, Hr, serie, graficar):
+def _graficar_elipses(carpeta, modo, A, Hr, serie, graficar, figuras=None):
     fig, ax = plt.subplots(figsize=(6, 6))
     for th, ph, color, nombre in ((serie[:, 0], serie[:, 1], 'r', 'Capa a'),
                                   (serie[:, 2], serie[:, 3], 'b', 'Capa b')):
@@ -242,7 +246,9 @@ def _graficar_elipses(carpeta, modo, A, Hr, serie, graficar):
     ax.grid(True)
     fig.savefig(os.path.join(carpeta, f'elipses_{modo}_A{A:g}.png'), dpi=300,
                 bbox_inches='tight')
-    if not graficar:
+    if figuras is not None:
+        figuras.append(fig)
+    elif not graficar:
         plt.close(fig)
 
 
@@ -277,7 +283,7 @@ def _animar_elipses(carpeta, modo, A, t_T, serie, graficar):
     plt.close(fig)                                    # el GIF ya quedó guardado
 
 
-def _graficar_dispersion(carpeta, A, frecuencia, resultado, graficar):
+def _graficar_dispersion(carpeta, A, frecuencia, resultado, graficar, figuras=None):
     fig, ax = plt.subplots(figsize=(7, 5))
     ax.plot(resultado['campos'], resultado['f_acustico'], 'o--', label='Modo acústico',
             markersize=3)
@@ -294,7 +300,9 @@ def _graficar_dispersion(carpeta, A, frecuencia, resultado, graficar):
     ax.legend()
     ax.grid(True)
     fig.savefig(os.path.join(carpeta, f'dispersion_A{A:g}.png'), dpi=300, bbox_inches='tight')
-    if not graficar:
+    if figuras is not None:
+        figuras.append(fig)
+    elif not graficar:
         plt.close(fig)
 
 
@@ -308,7 +316,7 @@ def autovectores_1capa(magn=1700,
                        frecuencia=9.76e9, ang_campo=0, h_rf=1,
                        campo_min=10, campo_max=1400, paso_campo=10,
                        paso_phi_M=0.5, n_tiempos=51,
-                       carpeta='.', guardar_gif=True, graficar=True):
+                       carpeta='.', guardar_gif=True, graficar=True, figuras=None):
     """
     magn          : magnetización (emu/cm³)
     Hc            : campo de anisotropía cúbica (Oe)
@@ -325,6 +333,8 @@ def autovectores_1capa(magn=1700,
     carpeta       : dónde se guardan los .txt, .png y .gif
     guardar_gif   : si es False, no genera la animación
     graficar      : si es False, guarda todo pero no abre ventanas
+    figuras       : lista opcional; si se pasa, se le agregan las figuras (no el GIF)
+                    y no se cierran
 
     Devuelve un diccionario con:
         'campos', 'f' : relación de dispersión (Oe, GHz)
@@ -437,12 +447,12 @@ def autovectores_1capa(magn=1700,
         print(f'Hr = {Hr:.1f} Oe, M a {resultado["modo"]["ang_M"]:.1f}°')
 
         _guardar_txt_1capa(carpeta, magn, Hr, t_T, serie_compleja)
-        _graficar_componentes_1capa(carpeta, magn, Hr, t_T, serie, graficar)
-        _graficar_elipse_1capa(carpeta, magn, Hr, serie, graficar)
+        _graficar_componentes_1capa(carpeta, magn, Hr, t_T, serie, graficar, figuras)
+        _graficar_elipse_1capa(carpeta, magn, Hr, serie, graficar, figuras)
         if guardar_gif:
             _animar_elipse_1capa(carpeta, magn, t_T, serie)
 
-    _graficar_dispersion_1capa(carpeta, magn, frecuencia, resultado, graficar)
+    _graficar_dispersion_1capa(carpeta, magn, frecuencia, resultado, graficar, figuras)
 
     if graficar:
         plt.show()
@@ -467,7 +477,7 @@ def _guardar_txt_1capa(carpeta, magn, Hr, t_T, serie_compleja):
                comments='')
 
 
-def _graficar_componentes_1capa(carpeta, magn, Hr, t_T, serie, graficar):
+def _graficar_componentes_1capa(carpeta, magn, Hr, t_T, serie, graficar, figuras=None):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(7, 8), sharex=True)
     ax1.plot(t_T, serie[:, 1], 'o--', color='r', label=r'm$_{\varphi}$', markersize=3)
     ax1.set_ylabel(r'm$_{\varphi}$/M$_s$')
@@ -483,11 +493,13 @@ def _graficar_componentes_1capa(carpeta, magn, Hr, t_T, serie, graficar):
         ax.grid(True)
     fig.savefig(os.path.join(carpeta, f'componentes_1capa_M{magn:g}.png'), dpi=300,
                 bbox_inches='tight')
-    if not graficar:
+    if figuras is not None:
+        figuras.append(fig)
+    elif not graficar:
         plt.close(fig)
 
 
-def _graficar_elipse_1capa(carpeta, magn, Hr, serie, graficar):
+def _graficar_elipse_1capa(carpeta, magn, Hr, serie, graficar, figuras=None):
     th, ph = serie.T
     fig, ax = plt.subplots(figsize=(6, 6))
     ax.plot(th, ph, '-', color='r')
@@ -503,7 +515,9 @@ def _graficar_elipse_1capa(carpeta, magn, Hr, serie, graficar):
     ax.grid(True)
     fig.savefig(os.path.join(carpeta, f'elipse_1capa_M{magn:g}.png'), dpi=300,
                 bbox_inches='tight')
-    if not graficar:
+    if figuras is not None:
+        figuras.append(fig)
+    elif not graficar:
         plt.close(fig)
 
 
@@ -532,7 +546,7 @@ def _animar_elipse_1capa(carpeta, magn, t_T, serie):
     plt.close(fig)                                    # el GIF ya quedó guardado
 
 
-def _graficar_dispersion_1capa(carpeta, magn, frecuencia, resultado, graficar):
+def _graficar_dispersion_1capa(carpeta, magn, frecuencia, resultado, graficar, figuras=None):
     fig, ax = plt.subplots(figsize=(7, 5))
     ax.plot(resultado['campos'], resultado['f'], 'o--', label='Modo', markersize=3)
     ax.axhline(frecuencia/1e9, color='red', linestyle='--', linewidth=2,
@@ -547,7 +561,9 @@ def _graficar_dispersion_1capa(carpeta, magn, frecuencia, resultado, graficar):
     ax.grid(True)
     fig.savefig(os.path.join(carpeta, f'dispersion_1capa_M{magn:g}.png'), dpi=300,
                 bbox_inches='tight')
-    if not graficar:
+    if figuras is not None:
+        figuras.append(fig)
+    elif not graficar:
         plt.close(fig)
 
 

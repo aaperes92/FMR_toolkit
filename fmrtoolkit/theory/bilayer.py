@@ -45,7 +45,7 @@ def variacion_angular_ip_bicapa(archivo,
                                 col_angulo=0, col_Hr=1, defasaje_deg=-3,
                                 margen_campo=1000, paso_campo=20,
                                 ang_inicio=0, ang_fin=180, paso_ang=5,
-                                paso_phi_M=2, graficar=True):
+                                paso_phi_M=2, graficar=True, carpeta_salida=None, figuras=None):
     """
     archivo              : output_*.txt de los ajustes de la variación angular experimental
     magn_a, magn_b       : magnetización de cada capa (emu/cm³)
@@ -67,6 +67,8 @@ def variacion_angular_ip_bicapa(archivo,
     paso_phi_M           : paso en grados de la grilla inicial del equilibrio de M
                            (después se refina, así que puede ser grueso)
     graficar             : si es False, guarda el PDF pero no abre la ventana
+    carpeta_salida       : dónde se guardan el .txt y el .pdf. None -> en la carpeta de `archivo`
+    figuras              : lista opcional; si se pasa, se le agrega la figura y no se cierra
 
     Devuelve: ángulos del campo, Hr acústico, Hr óptico (Oe; nan si no cae en el
     rango de campos) y los ángulos de equilibrio de cada capa en la resonancia
@@ -186,7 +188,8 @@ def variacion_angular_ip_bicapa(archivo,
     # GUARDAR (en la misma carpeta que el archivo experimental)
     # ==================================================
 
-    carpeta = os.path.dirname(os.path.abspath(archivo))
+    carpeta = os.path.dirname(os.path.abspath(archivo)) if carpeta_salida is None else carpeta_salida
+    os.makedirs(carpeta, exist_ok=True)
     nombre = f'output_angular_IP_bicapa_A{A}_eje{ang_u}'
 
     np.savetxt(os.path.join(carpeta, nombre + '.txt'),
@@ -211,9 +214,11 @@ def variacion_angular_ip_bicapa(archivo,
     ax.grid(True)
     fig.savefig(os.path.join(carpeta, nombre + '.pdf'), bbox_inches='tight')
 
+    if figuras is not None:
+        figuras.append(fig)
     if graficar:
         plt.show()
-    else:
+    elif figuras is None:
         plt.close(fig)
 
     print(f'Tiempo: {time.time() - inicio:.1f} s')

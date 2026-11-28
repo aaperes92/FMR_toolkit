@@ -21,14 +21,13 @@ def variacion_angular_ip(archivo,
                          col_angulo=0, col_Hr=1, defasaje_deg=12,
                          margen_campo=400, paso_campo=20,
                          ang_inicio=0, ang_fin=185, paso_ang=5,
-                         paso_phi_M=0.5, graficar=True):
+                         paso_phi_M=0.5, graficar=True, carpeta_salida=None, figuras=None):
     """
     archivo       : output_*.txt de los ajustes de la variación angular experimental
     Hu, Hc        : campos de anisotropía uniaxial y cúbica (Oe)
     magn          : magnetización (emu/cm³)
     ang_u         : dirección del eje fácil uniaxial (grados)
     g, frecuencia : factor g y frecuencia de medición (Hz)
-    espesor       : espesor (cm). En una monocapa se cancela; queda para bicapas
     col_angulo    : columna del ángulo en el archivo (la 0)
     col_Hr        : columna del Hr experimental que se compara
     defasaje_deg  : corrimiento de los ángulos experimentales para que coincidan con la teoría
@@ -36,6 +35,9 @@ def variacion_angular_ip(archivo,
     paso_campo    : paso de campo de la simulación (Oe)
     ang_inicio, ang_fin, paso_ang : ángulos del campo que se simulan (grados, ang_fin incluido)
     paso_phi_M    : paso en grados para buscar el ángulo de equilibrio de M
+    graficar      : True -> muestra la figura (el PDF se guarda siempre)
+    carpeta_salida: dónde se guardan el .txt y el .pdf. None -> en la carpeta de `archivo`
+    figuras       : lista opcional; si se pasa, se le agrega la figura y no se cierra
     """
     inicio = time.time()
 
@@ -135,7 +137,8 @@ def variacion_angular_ip(archivo,
     # GUARDAR (en la misma carpeta que el archivo experimental)
     # ==================================================
 
-    carpeta = os.path.dirname(os.path.abspath(archivo))
+    carpeta = os.path.dirname(os.path.abspath(archivo)) if carpeta_salida is None else carpeta_salida
+    os.makedirs(carpeta, exist_ok=True)
     nombre = f'output_angular_IP_teoria_magn{magn}_eje{ang_u}'
 
     np.savetxt(os.path.join(carpeta, nombre + '.txt'), np.column_stack((angulo_IP, Hr)),
@@ -155,9 +158,11 @@ def variacion_angular_ip(archivo,
     ax.grid(True)
     fig.savefig(os.path.join(carpeta, nombre + '.pdf'), bbox_inches='tight')
 
+    if figuras is not None:
+        figuras.append(fig)
     if graficar:
         plt.show()
-    else:
+    elif figuras is None:
         plt.close(fig)
 
     print(f'Tiempo: {time.time() - inicio:.1f} s')
@@ -173,7 +178,7 @@ def variacion_angular_op(archivo,
                          col_angulo=0, col_Hr=1, defasaje_deg=-3,
                          margen_campo=90, paso_campo=80,
                          ang_inicio=0, ang_fin=180, paso_ang=5,
-                         paso_phi_M=0.05, graficar=True):
+                         paso_phi_M=0.05, graficar=True, carpeta_salida=None, figuras=None):
     """
     Variación angular de Hr con el campo rotando fuera del plano
     (monocapa sin anisotropía en el plano, por ejemplo Py).
@@ -193,6 +198,9 @@ def variacion_angular_op(archivo,
     paso_campo    : paso de campo de la simulación (Oe)
     ang_inicio, ang_fin, paso_ang : ángulos del campo que se simulan (grados, ang_fin incluido)
     paso_phi_M    : paso en grados para buscar el ángulo de equilibrio de M
+    graficar      : True -> muestra la figura (el PDF se guarda siempre)
+    carpeta_salida: dónde se guardan el .txt y el .pdf. None -> en la carpeta de `archivo`
+    figuras       : lista opcional; si se pasa, se le agrega la figura y no se cierra
     """
     inicio = time.time()
 
@@ -293,7 +301,8 @@ def variacion_angular_op(archivo,
     # GUARDAR (en la misma carpeta que el archivo experimental)
     # ==================================================
 
-    carpeta = os.path.dirname(os.path.abspath(archivo))
+    carpeta = os.path.dirname(os.path.abspath(archivo)) if carpeta_salida is None else carpeta_salida
+    os.makedirs(carpeta, exist_ok=True)
     nombre = f'output_angular_OP_teoria_magn{magn}'
 
     np.savetxt(os.path.join(carpeta, nombre + '.txt'), np.column_stack((angulo_OP, ang_eq, Hr)),
@@ -313,9 +322,11 @@ def variacion_angular_op(archivo,
     ax.grid(True)
     fig.savefig(os.path.join(carpeta, nombre + '.pdf'), bbox_inches='tight')
 
+    if figuras is not None:
+        figuras.append(fig)
     if graficar:
         plt.show()
-    else:
+    elif figuras is None:
         plt.close(fig)
 
     print(f'Tiempo: {time.time() - inicio:.1f} s')

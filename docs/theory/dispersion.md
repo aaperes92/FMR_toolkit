@@ -11,7 +11,7 @@ campos, f, ang = dispersion_1capa(magn=1300, Hc=250, carpeta="results")
 campos, f1, f2, ang_a, ang_b = dispersion_2capas(A=0.08, carpeta="results")
 ```
 
-## `dispersion_1capa(magn=1300, g=2.015, damp=0.0026, Hc=250, Hu=0, ang_u=45, ang_campo=0, campo_min=5, campo_max=4000, paso_campo=50, paso_phi_M=0.01, carpeta='.', graficar=True)`
+## `dispersion_1capa(magn=1300, g=2.015, damp=0.0026, Hc=250, Hu=0, ang_u=45, ang_campo=0, campo_min=5, campo_max=4000, paso_campo=50, paso_phi_M=0.01, carpeta='.', graficar=True, figuras=None)`
 
 Energy: [`e_libre_IP_1L`](free_energy.md). Matrix: [`matriz_1capa`](smit_beljers.md).
 
@@ -25,8 +25,9 @@ Energy: [`e_libre_IP_1L`](free_energy.md). Matrix: [`matriz_1capa`](smit_beljers
 | `ang_campo` | `0` | deg | In-plane field angle |
 | `campo_min`, `campo_max`, `paso_campo` | `5`, `4000`, `50` | Oe | Fields that are computed (`campo_max` excluded) |
 | `paso_phi_M` | `0.01` | deg | Grid step of the equilibrium angle (full turn, no refinement) |
-| `carpeta` | `'.'` | — | Output folder |
+| `carpeta` | `'.'` | — | Output folder (must exist) |
 | `graficar` | `True` | — | Show the figure |
+| `figuras` | `None` | — | Optional list. If given, every figure the function creates is appended to it and **not closed**, even with `graficar=False` (used by the GUI to show the plots). `None` keeps the previous behaviour |
 
 **Returns** `(campos, freq, ang_eq)`: fields (Oe), frequency of the mode (**GHz**, `nan`
 if there is no positive eigenvalue) and equilibrium angle of M (deg).
@@ -34,7 +35,7 @@ if there is no positive eigenvalue) and equilibrium angle of M (deg).
 **Files** (in `carpeta`): `Dispersion_1capa_magn<magn>_<ang_campo>deg.txt`, columns
 `Field (Oe), Frequency (GHz), angulo magnetizacion (deg)`, and the `.pdf` with the same name.
 
-## `dispersion_2capas(magn_a=1300, magn_b=770, g_a=2.015, g_b=2.011, damp_a=0.0026, damp_b=0.006, Hc_a=250, Hc_b=250, Hu_a=0, Hu_b=0, ang_u=45, espesor_a=1e-6, espesor_b=1e-6, A=0.08, ang_campo=0, campo_min=5, campo_max=4000, paso_campo=50, paso_phi_M=2, carpeta='.', graficar=True)`
+## `dispersion_2capas(magn_a=1300, magn_b=770, g_a=2.015, g_b=2.011, damp_a=0.0026, damp_b=0.006, Hc_a=250, Hc_b=250, Hu_a=0, Hu_b=0, ang_u=45, espesor_a=1e-6, espesor_b=1e-6, A=0.08, ang_campo=0, campo_min=5, campo_max=4000, paso_campo=50, paso_phi_M=2, carpeta='.', graficar=True, figuras=None)`
 
 Energy: [`e_libre_IP_2L`](free_energy.md). Matrix: [`matriz_2capas`](smit_beljers.md).
 
@@ -50,8 +51,9 @@ Energy: [`e_libre_IP_2L`](free_energy.md). Matrix: [`matriz_2capas`](smit_beljer
 | `ang_campo` | `0` | deg | In-plane field angle |
 | `campo_min`, `campo_max`, `paso_campo` | `5`, `4000`, `50` | Oe | Fields that are computed |
 | `paso_phi_M` | `2` | deg | Step of the 2D equilibrium grid (refined with Nelder–Mead) |
-| `carpeta` | `'.'` | — | Output folder |
+| `carpeta` | `'.'` | — | Output folder (must exist) |
 | `graficar` | `True` | — | Show the figure |
+| `figuras` | `None` | — | Optional list. If given, every figure the function creates is appended to it and **not closed**, even with `graficar=False` (used by the GUI to show the plots). `None` keeps the previous behaviour |
 
 **Returns** `(campos, freq1, freq2, ang_a_eq, ang_b_eq)`: fields (Oe), lower and higher
 mode frequency (**GHz**, f1 < f2, `nan` if a mode is missing) and equilibrium angles of
@@ -67,6 +69,3 @@ angulo magnetizacion capa B (deg)`, and the `.pdf` with the same name.
   acoustic and optical modes; with A < 0 the order is inverted.
 - To also get the eigenvectors and the precession at resonance, use
   [`eigenvectors`](eigenvectors.md), which computes the same dispersion internally.
-- The example in the `if __name__ == '__main__':` block of `dispersion.py` calls
-  `dispersion_2capas(A=80, ...)`, a leftover from the old convention (A/100). With the
-  current energy it means 80 erg/cm².

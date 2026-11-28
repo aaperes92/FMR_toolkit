@@ -11,7 +11,7 @@ ang, Hr_ac, Hr_op, ang_a, ang_b = variacion_angular_ip_bicapa(
     "path/to/output_2peak.txt", A=0.8, frecuencia=24.9e9, col_Hr=[1, 3])
 ```
 
-## `variacion_angular_ip_bicapa(archivo, magn_a=1682, magn_b=770, espesor_a=2.5e-6, espesor_b=5e-7, Hc_a=150, Hc_b=150, Hu_a=50, Hu_b=50, ang_u=45, g_a=2.088, g_b=2.091, A=0.8, frecuencia=24.9e9, col_angulo=0, col_Hr=1, defasaje_deg=-3, margen_campo=1000, paso_campo=20, ang_inicio=0, ang_fin=180, paso_ang=5, paso_phi_M=2, graficar=True)`
+## `variacion_angular_ip_bicapa(archivo, magn_a=1682, magn_b=770, espesor_a=2.5e-6, espesor_b=5e-7, Hc_a=150, Hc_b=150, Hu_a=50, Hu_b=50, ang_u=45, g_a=2.088, g_b=2.091, A=0.8, frecuencia=24.9e9, col_angulo=0, col_Hr=1, defasaje_deg=-3, margen_campo=1000, paso_campo=20, ang_inicio=0, ang_fin=180, paso_ang=5, paso_phi_M=2, graficar=True, carpeta_salida=None, figuras=None)`
 
 Energy: [`e_libre_IP_2L`](free_energy.md). Matrix: [`matriz_2capas`](smit_beljers.md)
 without damping.
@@ -37,6 +37,8 @@ without damping.
 | `ang_inicio`, `ang_fin`, `paso_ang` | `0`, `180`, `5` | deg | Field angles that are simulated |
 | `paso_phi_M` | `2` | deg | Step of the 2D equilibrium grid (refined afterwards with Nelder–Mead) |
 | `graficar` | `True` | — | Show the figure (the PDF is saved anyway) |
+| `carpeta_salida` | `None` | — | Folder for the output files. `None` writes them into the folder of `archivo`, as before |
+| `figuras` | `None` | — | Optional list. If given, every figure the function creates is appended to it and **not closed**, even with `graficar=False` (used by the GUI to show the plots). `None` keeps the previous behaviour |
 
 ### Return value
 
@@ -51,7 +53,7 @@ without damping.
 
 A message is printed if no mode resonates in the whole field range.
 
-### Output files (in the folder of `archivo`)
+### Output files (in the folder of `archivo`, or in `carpeta_salida` if given)
 
 | File | Content |
 |---|---|

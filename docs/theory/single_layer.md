@@ -15,7 +15,7 @@ angulos, Hr = variacion_angular_ip("path/to/output_2peak.txt",
                                    g=2.09, frecuencia=23.9e9, defasaje_deg=12)
 ```
 
-## `variacion_angular_ip(archivo, Hu=20, Hc=175, magn=1155, ang_u=45, g=2.09, frecuencia=23.9e9, col_angulo=0, col_Hr=1, defasaje_deg=12, margen_campo=400, paso_campo=20, ang_inicio=0, ang_fin=185, paso_ang=5, paso_phi_M=0.5, graficar=True)`
+## `variacion_angular_ip(archivo, Hu=20, Hc=175, magn=1155, ang_u=45, g=2.09, frecuencia=23.9e9, col_angulo=0, col_Hr=1, defasaje_deg=12, margen_campo=400, paso_campo=20, ang_inicio=0, ang_fin=185, paso_ang=5, paso_phi_M=0.5, graficar=True, carpeta_salida=None, figuras=None)`
 
 Field rotating **in the plane**. Energy: [`e_libre_IP_1L`](free_energy.md)
 (Zeeman, shape, uniaxial and cubic).
@@ -38,6 +38,8 @@ Field rotating **in the plane**. Energy: [`e_libre_IP_1L`](free_energy.md)
 | `ang_inicio`, `ang_fin`, `paso_ang` | `0`, `185`, `5` | deg | Field angles that are simulated (`ang_fin` included) |
 | `paso_phi_M` | `0.5` | deg | Grid step for the equilibrium angle of M (full turn, no refinement) |
 | `graficar` | `True` | — | Show the figure (the PDF is saved anyway) |
+| `carpeta_salida` | `None` | — | Folder for the output files. `None` writes them into the folder of `archivo`, as before |
+| `figuras` | `None` | — | Optional list. If given, every figure the function creates is appended to it and **not closed**, even with `graficar=False` (used by the GUI to show the plots). `None` keeps the previous behaviour |
 
 The function also prints the experimental spread of Hr (max − min), as a hint for `Hc`.
 
@@ -45,14 +47,14 @@ The function also prints the experimental spread of Hr (max − min), as a hint 
 
 `(angulo_IP, Hr)`: field angles (deg) and theoretical resonance fields (Oe), as arrays.
 
-### Output files (in the folder of `archivo`)
+### Output files (in the folder of `archivo`, or in `carpeta_salida` if given)
 
 | File | Content |
 |---|---|
 | `output_angular_IP_teoria_magn<magn>_eje<ang_u>.txt` | Columns `Angulo,Hr` |
 | `output_angular_IP_teoria_magn<magn>_eje<ang_u>.pdf` | Theory and experiment |
 
-## `variacion_angular_op(archivo, magn=785, g=2.11, frecuencia=9.78e9, col_angulo=0, col_Hr=1, defasaje_deg=-3, margen_campo=90, paso_campo=80, ang_inicio=0, ang_fin=180, paso_ang=5, paso_phi_M=0.05, graficar=True)`
+## `variacion_angular_op(archivo, magn=785, g=2.11, frecuencia=9.78e9, col_angulo=0, col_Hr=1, defasaje_deg=-3, margen_campo=90, paso_campo=80, ang_inicio=0, ang_fin=180, paso_ang=5, paso_phi_M=0.05, graficar=True, carpeta_salida=None, figuras=None)`
 
 Field rotating **out of plane**, for a single layer without in-plane anisotropy
 (for example permalloy). Energy: [`e_libre_OP_1L`](free_energy.md).
@@ -73,6 +75,7 @@ Angle of the field: **0° = in the film plane, 90° = along the normal**.
 | `ang_inicio`, `ang_fin`, `paso_ang` | `0`, `180`, `5` | deg | Field angles that are simulated |
 | `paso_phi_M` | `0.05` | deg | Grid step for the angle of M (grid from 0 to 185°) |
 | `graficar` | `True` | — | Show the figure |
+| `carpeta_salida`, `figuras` | `None` | — | As in `variacion_angular_ip` |
 
 The function prints a suggested M_eff from the perpendicular resonance,
 M = (Hr_max − ω/γ)/4π, useful as a starting value.
@@ -82,7 +85,7 @@ M = (Hr_max − ω/γ)/4π, useful as a starting value.
 `(angulo_OP, ang_eq, Hr)`: field angle (deg), equilibrium angle of M from the plane
 (deg), resonance field (Oe).
 
-### Output files (in the folder of `archivo`)
+### Output files (in the folder of `archivo`, or in `carpeta_salida` if given)
 
 | File | Content |
 |---|---|
@@ -101,5 +104,3 @@ and suggests increasing `margen_campo`.
   `paso_campo`.
 - The symbolic derivatives are recomputed for every field angle, which makes the
   functions slow with a fine `paso_ang`.
-- The docstring of `variacion_angular_ip` still lists an `espesor` parameter that no
-  longer exists.

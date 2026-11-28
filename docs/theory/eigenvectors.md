@@ -27,7 +27,7 @@ r2 = autovectores_bicapa(A=0.4, frecuencia=15e9, campo_max=3000, carpeta="result
 The dynamic components are normalised by the magnetisation of each layer:
 **m_θ/M_s** (out of plane) and **m_φ/M_s** (in plane).
 
-## `autovectores_1capa(magn=1700, Hc=250, Hu=250, ang_u=45, g=2.088, damp=0.0026, frecuencia=9.76e9, ang_campo=0, h_rf=1, campo_min=10, campo_max=1400, paso_campo=10, paso_phi_M=0.5, n_tiempos=51, carpeta='.', guardar_gif=True, graficar=True)`
+## `autovectores_1capa(magn=1700, Hc=250, Hu=250, ang_u=45, g=2.088, damp=0.0026, frecuencia=9.76e9, ang_campo=0, h_rf=1, campo_min=10, campo_max=1400, paso_campo=10, paso_phi_M=0.5, n_tiempos=51, carpeta='.', guardar_gif=True, graficar=True, figuras=None)`
 
 Energy: [`e_libre_IP_1L`](free_energy.md).
 
@@ -44,9 +44,10 @@ Energy: [`e_libre_IP_1L`](free_energy.md).
 | `campo_min`, `campo_max`, `paso_campo` | `10`, `1400`, `10` | Oe | Field grid of the dispersion relation |
 | `paso_phi_M` | `0.5` | deg | Grid step of the equilibrium angle (refined afterwards) |
 | `n_tiempos` | `51` | — | Time points in one period, including t = 0 and t = T |
-| `carpeta` | `'.'` | — | Output folder |
+| `carpeta` | `'.'` | — | Output folder (must exist) |
 | `guardar_gif` | `True` | — | Save the animation |
 | `graficar` | `True` | — | Show the figures (files are saved anyway) |
+| `figuras` | `None` | — | Optional list. If given, every figure except the GIF is appended to it and not closed. `None` keeps the previous behaviour |
 
 **Returns** a dictionary:
 
@@ -68,7 +69,7 @@ Energy: [`e_libre_IP_1L`](free_energy.md).
 If the mode is not found: *"El modo no se encuentra visible para esa frecuencia …"* is
 printed and only the dispersion plot is saved.
 
-## `autovectores_bicapa(magn_a=1700, magn_b=770, espesor_a=10e-7, espesor_b=5e-7, Hc_a=250, Hc_b=0, Hu_a=250, Hu_b=0, ang_u=45, g_a=2.088, g_b=2.091, damp_a=0.0026, damp_b=0.006, A=0.4, frecuencia=9.76e9, ang_campo=0, h_rf=1, campo_min=10, campo_max=1400, paso_campo=10, paso_phi_M=2, n_tiempos=51, carpeta='.', guardar_gif=True, graficar=True)`
+## `autovectores_bicapa(magn_a=1700, magn_b=770, espesor_a=10e-7, espesor_b=5e-7, Hc_a=250, Hc_b=0, Hu_a=250, Hu_b=0, ang_u=45, g_a=2.088, g_b=2.091, damp_a=0.0026, damp_b=0.006, A=0.4, frecuencia=9.76e9, ang_campo=0, h_rf=1, campo_min=10, campo_max=1400, paso_campo=10, paso_phi_M=2, n_tiempos=51, carpeta='.', guardar_gif=True, graficar=True, figuras=None)`
 
 Energy: [`e_libre_IP_2L`](free_energy.md). Same procedure, for each of the two modes.
 
@@ -87,7 +88,7 @@ Energy: [`e_libre_IP_2L`](free_energy.md). Same procedure, for each of the two m
 | `campo_min`, `campo_max`, `paso_campo` | `10`, `1400`, `10` | Oe | Field grid |
 | `paso_phi_M` | `2` | deg | Step of the 2D equilibrium grid (refined afterwards) |
 | `n_tiempos` | `51` | — | Time points in one period |
-| `carpeta`, `guardar_gif`, `graficar` | `'.'`, `True`, `True` | — | As above |
+| `carpeta`, `guardar_gif`, `graficar`, `figuras` | `'.'`, `True`, `True`, `None` | — | As above |
 
 **Returns** a dictionary:
 

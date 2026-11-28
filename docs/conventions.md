@@ -94,9 +94,10 @@ run are never fitted as data.
 
 - Plain text, **comma separated**, **one header line** (no `#`). Read them with
   `np.loadtxt(archivo, delimiter=',', skiprows=1)`.
-- Experiment modules write into the folder of the input data.
-- Theory functions that read an experimental file write into the folder of that file;
-  the others write into `carpeta`.
+- Experiment modules write into the folder of the input data, and theory functions that
+  read an experimental file write into the folder of that file. All of them accept an
+  optional `carpeta_salida` to write somewhere else.
+- Theory functions that do not read a file write into `carpeta` (the folder must exist).
 - File names include some parameters (for example `_A0.4` or `_magn1155`). Running again
   with the same values in the name **overwrites** the previous files.
 
@@ -105,3 +106,5 @@ run are never fitted as data.
 - `graficar=True` opens the figure windows (`plt.show()`).
 - `graficar=False` saves the PDF/PNG files without opening windows. Use it in loops and
   from the GUI.
+- `figuras=[]` (an empty list): every figure the function creates is appended to that list
+  and left open, so it can be shown elsewhere (this is what the GUI does).

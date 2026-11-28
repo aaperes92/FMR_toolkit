@@ -27,7 +27,7 @@ from fmrtoolkit.theory.free_energy import e_libre_IP_1L, e_libre_IP_2L
 def dispersion_1capa(magn=1300, g=2.015, damp=0.0026,
                      Hc=250, Hu=0, ang_u=45,
                      ang_campo=0, campo_min=5, campo_max=4000, paso_campo=50,
-                     paso_phi_M=0.01, carpeta='.', graficar=True):
+                     paso_phi_M=0.01, carpeta='.', graficar=True, figuras=None):
     """
     magn          : magnetización (emu/cm³)
     g, damp       : factor g y amortiguamiento de Gilbert
@@ -39,6 +39,7 @@ def dispersion_1capa(magn=1300, g=2.015, damp=0.0026,
     paso_phi_M    : paso en grados para buscar el ángulo de equilibrio de M
     carpeta       : dónde se guardan el .txt y el .pdf
     graficar      : si es False, guarda el .pdf pero no abre la ventana
+    figuras       : lista opcional; si se pasa, se le agrega la figura y no se cierra
 
     Devuelve campos (Oe), frecuencia (GHz) y ángulo de equilibrio de M (grados).
     """
@@ -115,9 +116,11 @@ def dispersion_1capa(magn=1300, g=2.015, damp=0.0026,
     ax.grid(True)
     fig.savefig(os.path.join(carpeta, nombre + '.pdf'), bbox_inches='tight')
 
+    if figuras is not None:
+        figuras.append(fig)
     if graficar:
         plt.show()
-    else:
+    elif figuras is None:
         plt.close(fig)
 
     print(f'Tiempo: {time.time() - inicio:.1f} s')
@@ -134,7 +137,7 @@ def dispersion_2capas(magn_a=1300, magn_b=770, g_a=2.015, g_b=2.011,
                       Hc_a=250, Hc_b=250, Hu_a=0, Hu_b=0, ang_u=45,
                       espesor_a=1e-6, espesor_b=1e-6, A=0.08,
                       ang_campo=0, campo_min=5, campo_max=4000, paso_campo=50,
-                      paso_phi_M=2, carpeta='.', graficar=True):
+                      paso_phi_M=2, carpeta='.', graficar=True, figuras=None):
     """
     magn_a, magn_b     : magnetización de cada capa (emu/cm³)
     g_a, g_b           : factor g de cada capa
@@ -150,6 +153,7 @@ def dispersion_2capas(magn_a=1300, magn_b=770, g_a=2.015, g_b=2.011,
                          (después se refina, así que no hace falta que sea chico)
     carpeta            : dónde se guardan el .txt y el .pdf
     graficar           : si es False, guarda el .pdf pero no abre la ventana
+    figuras            : lista opcional; si se pasa, se le agrega la figura y no se cierra
 
     Devuelve campos (Oe), las dos frecuencias (GHz, f1 < f2) y los ángulos de
     equilibrio de cada capa (grados).
@@ -250,9 +254,11 @@ def dispersion_2capas(magn_a=1300, magn_b=770, g_a=2.015, g_b=2.011,
     ax.grid(True)
     fig.savefig(os.path.join(carpeta, nombre + '.pdf'), bbox_inches='tight')
 
+    if figuras is not None:
+        figuras.append(fig)
     if graficar:
         plt.show()
-    else:
+    elif figuras is None:
         plt.close(fig)
 
     print(f'Tiempo: {time.time() - inicio:.1f} s')
