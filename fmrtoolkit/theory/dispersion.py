@@ -264,5 +264,5 @@ if __name__ == '__main__':
     # se ejecuta solo si corrés el archivo directamente, no cuando se importa
     carpeta = r'C:\Disco D\Study\Phd Bariloche\FMR'
 
-    dispersion_2capas(A=80, carpeta=carpeta)
+    dispersion_2capas(A=0.08, carpeta=carpeta)
     # dispersion_1capa(magn=1300, carpeta=carpeta)

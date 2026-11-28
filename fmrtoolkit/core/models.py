@@ -9,6 +9,10 @@ def lorentziana(var, y0, Amplitude, var0, ancho, phi):
     d_disp = (2*Amplitude/np.pi) * (8*x**2 - 2*ancho**2) / den
     return y0 - np.cos(phi)*d_abs + np.sin(phi)*d_disp
 
+def una_lorentziana(var, y0, m, A, var0, ancho, phi):
+    """Una derivada de lorentziana sobre un fondo lineal y0 + m*var."""
+    return y0 + m*var + lorentziana(var, 0, A, var0, ancho, phi)
+
 def dos_lorentzianas(var, y0, m, A1, var0_1, ancho1, phi1, A2, var0_2, ancho2, phi2):
     """Dos derivadas de lorentziana sobre un fondo lineal y0 + m*var."""
     return (y0 + m*var

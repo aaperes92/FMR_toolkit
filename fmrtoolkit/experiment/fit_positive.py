@@ -9,7 +9,7 @@ from scipy.optimize import curve_fit
 from fmrtoolkit.core import models as lz
 from fmrtoolkit.core.fitting import estimar_p0   # o donde tengas definida estimar_p0
 
-MODELOS = {1: lz.lorentziana, 2: lz.dos_lorentzianas}
+MODELOS = {1: lz.una_lorentziana, 2: lz.dos_lorentzianas}
 
 # El ajuste da el FWHM de la lorentziana. Se guarda el pico-pico: FWHM / sqrt(3)
 FWHM_A_PP = 1 / np.sqrt(3)
@@ -65,7 +65,7 @@ def ajustar_carpeta(carpeta, n_lineas=2, ventana=300, graficar=True, extensiones
         campo_fit = np.linspace(campo.min(), campo.max(), 1000)
         intensidad_fit = modelo(campo_fit, *popt)
         fondo_fit = y0_fit + m_fit * campo_fit
-        curvas_lineas = [fondo_fit + lz.lorentziana(campo_fit, 0, 0, *linea) for linea in lineas]
+        curvas_lineas = [fondo_fit + lz.lorentziana(campo_fit, 0, *linea) for linea in lineas]
 
         if graficar:
             plt.figure(figsize=(7, 5))
