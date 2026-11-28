@@ -28,6 +28,11 @@ calculation chain (free energy → equilibrium → Smit–Beljers matrix → fre
 | [`theory.dispersion`](theory/dispersion.md) | `dispersion_1capa`, `dispersion_2capas` | Frequency vs field (dispersion relations) |
 | [`theory.eigenvectors`](theory/eigenvectors.md) | `autovectores_1capa`, `autovectores_bicapa` | Precession of M at resonance: dynamic components, ellipses, GIF |
 
+## Graphical interface
+
+**[`gui`](gui.md)** — launching the GUI (`python -m fmrtoolkit.gui`), what each part of the
+window does, and how to add a technique to it.
+
 ## Keeping the documentation up to date
 
 When you change the parameters, return values or output files of a function, update

@@ -20,7 +20,7 @@ The toolkit grew out of the analysis codes written during a PhD on magnetic thin
 | `theory.dispersion` | Dispersion relations f(H), single layer and bilayer | Available | [docs](docs/theory/dispersion.md) |
 | `theory.eigenvectors` | Precession of M at resonance (dynamic components, ellipses, GIF), single layer and bilayer | Available | [docs](docs/theory/eigenvectors.md) |
 | `theory.linewidth` | Angular dependence of the linewidth and its contributions | In progress | — |
-| `gui` | Tkinter graphical interface with one tab per tool | Planned | — |
+| `gui` | Tkinter graphical interface: every technique above without writing code | Available | [docs](docs/gui.md) |
 
 Function and variable names are in Spanish. The documentation is in English.
 
@@ -32,6 +32,7 @@ The **[documentation](docs/README.md)** describes every public function: what it
 its parameters (with units), its return value and the files it writes.
 
 - **[Conventions](docs/conventions.md)** — units, angles, linewidth definitions and file formats used by every module. Read this first.
+- **[Graphical interface](docs/gui.md)** — how to launch the GUI and what each part does.
 - **Experiment:** [`fit_positive`](docs/experiment/fit_positive.md) · [`fit_bipolar`](docs/experiment/fit_bipolar.md) · [`broadband`](docs/experiment/broadband.md)
 - **Theory:** [overview](docs/theory/overview.md) · [`free_energy`](docs/theory/free_energy.md) · [`smit_beljers`](docs/theory/smit_beljers.md) · [`single_layer`](docs/theory/single_layer.md) · [`bilayer`](docs/theory/bilayer.md) · [`dispersion`](docs/theory/dispersion.md) · [`eigenvectors`](docs/theory/eigenvectors.md)
 
@@ -65,9 +66,23 @@ Check the installation:
 python -c "import fmrtoolkit.experiment.broadband, fmrtoolkit.theory.single_layer"
 ```
 
+The graphical interface uses tkinter, which comes with Python on Windows and macOS. On
+Linux it may need the system package (for example `sudo apt install python3-tk`).
+
 ---
 
 ## Quick start
+
+### Graphical interface
+
+```bash
+python -m fmrtoolkit.gui
+```
+
+Choose a technique on the left, fill in the form (every field has an ⓘ with its
+description) and press *Run*. See the [GUI documentation](docs/gui.md).
+
+### From Python
 
 Each module can be imported from a script or notebook, or run directly (`python -m fmrtoolkit.experiment.fit_positive`).
 
@@ -195,7 +210,7 @@ fmr-toolkit/
 ├── LICENSE
 ├── CITATION.cff
 ├── pyproject.toml            # metadata and dependencies
-├── main.py                   # launches the GUI (planned)
+├── main.py                   # launches the GUI (same as python -m fmrtoolkit.gui)
 ├── fmrtoolkit/
 │   ├── core/
 │   │   ├── constants.py      # physical constants and unit conversions
@@ -215,7 +230,7 @@ fmr-toolkit/
 │   │   ├── dispersion.py     # dispersion relations
 │   │   └── eigenvectors.py   # precession at resonance
 │   ├── plotting.py
-│   └── gui/                  # Tkinter interface (planned)
+│   └── gui/                  # Tkinter interface (python -m fmrtoolkit.gui)
 ├── examples/
 │   ├── data/                 # example spectra
 │   └── notebooks/            # usage without the GUI
@@ -234,8 +249,8 @@ Physics and analysis live in `core/`, `experiment/` and `theory/`, and never dep
 
 1. Create a branch for your work: `git switch -c my-feature`
 2. Make small commits with descriptive messages.
-3. Before pushing, check that all modules import without errors (see *Installation*).
-4. If you change the parameters, return values or output files of a function, update its page in [`docs/`](docs/README.md). A new module gets a new page and a row in the *Features* table.
+3. Before pushing, run the tests: `python -m unittest discover tests` (they also check that the GUI is in sync with the function signatures).
+4. If you change the parameters, return values or output files of a function, update its page in [`docs/`](docs/README.md). A new module gets a new page and a row in the *Features* table. To show a new function in the GUI, add it to `fmrtoolkit/gui/especificaciones.py` and its texts to `gui/i18n/` (see [GUI → For developers](docs/gui.md#for-developers)).
 5. Open a Pull Request to `main` and ask for a review.
 
 Measurement data and generated outputs (`*.dat`, `output_*.txt`, `*.pdf`) are excluded via `.gitignore`. Only small example files go in `examples/data/`.
