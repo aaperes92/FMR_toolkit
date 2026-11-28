@@ -16,3 +16,7 @@ dependencies = ["numpy", "scipy", "matplotlib", "sympy"]
 
 [tool.setuptools.packages.find]
 include = ["fmrtoolkit*"]
+
+# Textos de la interfaz gráfica (sin esto, `pip install .` no copia los .json)
+[tool.setuptools.package-data]
+"fmrtoolkit.gui" = ["i18n/*.json"]

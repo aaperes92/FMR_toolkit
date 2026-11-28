@@ -100,6 +100,7 @@ class Tecnica:
     id: str
     seccion: str                # 'experimento' o 'teoria'
     variantes: tuple
+    doc: str = ''               # página de la documentación, relativa a docs/
     advertencias: tuple = field(default=())
 
     def variante(self, id_variante=None):
@@ -187,7 +188,7 @@ BICAPA_ANISOTROPIA = (_P('Hc_a', 'anisotropia', unidad='Oe'), _P('Hc_b', 'anisot
 
 TECNICAS = (
     # ---------------- EXPERIMENTO ----------------
-    Tecnica('fit_positive', 'experimento', (
+    Tecnica('fit_positive', 'experimento', doc='experiment/fit_positive.md', variantes=(
         Variante('unica', fit_positive.ajustar_carpeta,
                  entrada='carpeta', param_entrada='carpeta',
                  parametros=(_P('n_lineas', 'ajuste', tipo='opcion', opciones=(1, 2)),
@@ -195,14 +196,14 @@ TECNICAS = (
                              _P('extensiones', 'datos', tipo='extensiones', avanzado=True)),
                  advertencias=(SOBRESCRIBE,)),)),
 
-    Tecnica('fit_bipolar', 'experimento', (
+    Tecnica('fit_bipolar', 'experimento', doc='experiment/fit_bipolar.md', variantes=(
         Variante('unica', fit_bipolar.ajustar_carpeta,
                  entrada='carpeta', param_entrada='carpeta',
                  parametros=(_P('skiprows', 'datos', tipo='entero', minimo=0),
                              _P('extensiones', 'datos', tipo='extensiones', avanzado=True)),
                  advertencias=(SOBRESCRIBE,)),)),
 
-    Tecnica('broadband', 'experimento', (
+    Tecnica('broadband', 'experimento', doc='experiment/broadband.md', variantes=(
         Variante('unica', broadband.ajustar_banda_ancha,
                  entrada='archivo', param_entrada='archivo',
                  parametros=(_P('col_Hr', 'datos', tipo='entero', minimo=1),
@@ -216,7 +217,7 @@ TECNICAS = (
                                SOBRESCRIBE)),)),
 
     # ---------------- TEORÍA ----------------
-    Tecnica('angular_ip', 'teoria', (
+    Tecnica('angular_ip', 'teoria', doc='theory/single_layer.md', variantes=(
         Variante('unica', single_layer.variacion_angular_ip,
                  entrada='archivo', param_entrada='archivo',
                  parametros=(COL_ANGULO, _P('col_Hr', 'datos', tipo='entero', minimo=1), DEFASAJE,
@@ -225,7 +226,7 @@ TECNICAS = (
                  advertencias=(Advertencia('rango_ip'), SOBRESCRIBE),
                  validaciones=(_rango_angulos,)),)),
 
-    Tecnica('angular_op', 'teoria', (
+    Tecnica('angular_op', 'teoria', doc='theory/single_layer.md', variantes=(
         Variante('unica', single_layer.variacion_angular_op,
                  entrada='archivo', param_entrada='archivo',
                  parametros=(COL_ANGULO, _P('col_Hr', 'datos', tipo='entero', minimo=1), DEFASAJE,
@@ -233,7 +234,7 @@ TECNICAS = (
                  advertencias=(Advertencia('rango_ip'), SOBRESCRIBE),
                  validaciones=(_rango_angulos, _margen_mayor_que_paso)),)),
 
-    Tecnica('angular_bicapa', 'teoria', (
+    Tecnica('angular_bicapa', 'teoria', doc='theory/bilayer.md', variantes=(
         Variante('unica', bilayer.variacion_angular_ip_bicapa,
                  entrada='archivo', param_entrada='archivo',
                  parametros=(COL_ANGULO, _P('col_Hr', 'datos', tipo='columnas'), DEFASAJE,
@@ -242,7 +243,7 @@ TECNICAS = (
                  advertencias=(ACOPLE_NEGATIVO, SOBRESCRIBE),
                  validaciones=(_rango_angulos,)),)),
 
-    Tecnica('dispersion', 'teoria', (
+    Tecnica('dispersion', 'teoria', doc='theory/dispersion.md', variantes=(
         Variante('1capa', dispersion.dispersion_1capa, param_salida='carpeta',
                  parametros=(MAGN, G, _P('damp', 'material', minimo=0), HU, HC, ANG_U,
                              _P('ang_campo', 'campo', unidad='°'), *RANGO_CAMPOS, PASO_PHI_M),
@@ -257,7 +258,7 @@ TECNICAS = (
                  validaciones=(_rango_campos,)),
     )),
 
-    Tecnica('autovectores', 'teoria', (
+    Tecnica('autovectores', 'teoria', doc='theory/eigenvectors.md', variantes=(
         Variante('1capa', eigenvectors.autovectores_1capa, param_salida='carpeta',
                  parametros=(MAGN, G, _P('damp', 'material', minimo=0), HU, HC, ANG_U,
                              FRECUENCIA, _P('ang_campo', 'campo', unidad='°'),

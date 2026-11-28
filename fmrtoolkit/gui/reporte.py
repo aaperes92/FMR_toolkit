@@ -55,24 +55,24 @@ def info_entorno():
     return info
 
 
-def armar_reporte(textos, tipo, descripcion, contexto, entorno=None):
-    """Texto completo del reporte.
+def encabezado_reporte(textos, tipo, descripcion):
+    """Primera parte del reporte: tipo de problema, fecha y descripción del usuario."""
+    t = textos.t
+    return '\n'.join([f"{t('reporte.titulo_tipo')}: {t('reporte.tipo_' + tipo)}",
+                      f"{t('reporte.fecha')}: {datetime.datetime.now():%Y-%m-%d %H:%M}",
+                      '',
+                      f"== {t('reporte.descripcion')} ==",
+                      (descripcion or '').strip() or '-',
+                      '']) + '\n'
 
-    textos   : objeto Textos (idioma.py)
-    tipo     : 'error' o 'resultado'
-    contexto : dict con 'tecnica', 'funcion', 'parametros' (dict), 'entrada', 'salida',
-               'traceback' y 'consola' (todos opcionales)
-    """
+
+def contexto_reporte(textos, contexto, entorno=None):
+    """Segunda parte del reporte: técnica, parámetros, entorno, traceback y consola.
+    Es la parte que el usuario puede revisar y editar en el diálogo."""
     t = textos.t
     entorno = info_entorno() if entorno is None else entorno
     ctx = contexto or {}
-    lineas = [f"{t('reporte.titulo_tipo')}: {t('reporte.tipo_' + tipo)}",
-              f"{t('reporte.fecha')}: {datetime.datetime.now():%Y-%m-%d %H:%M}",
-              '',
-              f"== {t('reporte.descripcion')} ==",
-              (descripcion or '').strip() or '-',
-              '',
-              f"== {t('reporte.tecnica')} ==",
+    lineas = [f"== {t('reporte.tecnica')} ==",
               f"{ctx.get('tecnica', '-')}  ({ctx.get('funcion', '-')})",
               f"{t('reporte.entrada')}: {ctx.get('entrada') or '-'}",
               f"{t('reporte.salida')}: {ctx.get('salida') or '-'}",
@@ -87,6 +87,17 @@ def armar_reporte(textos, tipo, descripcion, contexto, entorno=None):
     if ctx.get('consola'):
         lineas += ['', f"== {t('reporte.consola')} ==", ctx['consola'].rstrip()]
     return '\n'.join(lineas) + '\n'
+
+
+def armar_reporte(textos, tipo, descripcion, contexto, entorno=None):
+    """Texto completo del reporte.
+
+    textos   : objeto Textos (idioma.py)
+    tipo     : 'error' o 'resultado'
+    contexto : dict con 'tecnica', 'funcion', 'parametros' (dict), 'entrada', 'salida',
+               'traceback' y 'consola' (todos opcionales)
+    """
+    return encabezado_reporte(textos, tipo, descripcion) + contexto_reporte(textos, contexto, entorno)
 
 
 def resumen_reporte(textos, tipo, descripcion, contexto, ruta_archivo):
