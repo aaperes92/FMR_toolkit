@@ -1,0 +1,222 @@
+{
+  "app": {
+    "titulo": "FMR toolkit",
+    "carpeta_salida": "Output folder:",
+    "sin_carpeta": "(not chosen)",
+    "cambiar": "Change…",
+    "elegir_carpeta_salida": "Choose the folder where results are saved",
+    "pedir_carpeta_titulo": "Output folder",
+    "pedir_carpeta_texto": "You have not chosen an output folder yet. Results (tables, plots, GIFs) are saved there. Please choose it now.",
+    "idioma": "Language:",
+    "reportar": "⚠ Report a problem",
+    "elegir_tecnica": "Choose a technique in the left sidebar.",
+    "documentacion": "Documentation"
+  },
+  "secciones": {
+    "experimento": "EXPERIMENT",
+    "teoria": "THEORY"
+  },
+  "grupos": {
+    "datos": "Data",
+    "ajuste": "Fit",
+    "material": "Material",
+    "anisotropia": "Anisotropy",
+    "campo": "Field",
+    "simulacion": "Simulation",
+    "avanzado": "Advanced"
+  },
+  "tecnicas": {
+    "fit_positive": {"nombre": "Fit 0 → +H", "descripcion": "Fits every spectrum in a folder (sweep from 0 to +H) with 1 or 2 Lorentzian lines. Gives Hr, linewidth (peak-to-peak) and phase of each line."},
+    "fit_bipolar": {"nombre": "Fit −H → +H", "descripcion": "Fits every spectrum in a folder (sweep from −H to +H) with one line per branch. Gives Hr of each branch, mean Hr, field offset and widths (peak-to-peak)."},
+    "broadband": {"nombre": "Broadband", "descripcion": "Kittel fit f(Hr) → g and M_eff (optionally H_u), and linewidth ΔH(f) → damping α and ΔH₀. Reads an output_*.txt file from the fits."},
+    "angular_ip": {"nombre": "In-plane angular · single layer", "descripcion": "Theoretical Hr vs in-plane field angle (uniaxial + cubic anisotropy), compared with a measured angular series. Parameters are not fitted: they are chosen by hand."},
+    "angular_op": {"nombre": "Out-of-plane angular · single layer", "descripcion": "Theoretical Hr with the field rotating out of plane (0° = in plane, 90° = normal), compared with a measured angular series. Layer without in-plane anisotropy."},
+    "angular_bicapa": {"nombre": "In-plane angular · bilayer", "descripcion": "Hr of the acoustic and optical modes of a coupled bilayer vs in-plane field angle, compared with a measured angular series."},
+    "dispersion": {"nombre": "Dispersion", "descripcion": "Dispersion relation f(H) at a fixed field angle. No measured data needed."},
+    "autovectores": {"nombre": "Eigenvectors", "descripcion": "Precession of M at resonance: dynamic components vs time, precession ellipses and an animated GIF. No measured data needed."}
+  },
+  "variantes": {
+    "titulo": "System:",
+    "1capa": "Single layer",
+    "2capas": "Two layers",
+    "bicapa": "Bilayer",
+    "unica": ""
+  },
+  "entrada": {
+    "titulo": "Input",
+    "carpeta": "Folder with the spectra:",
+    "archivo": "Results file (output_*.txt):",
+    "elegir": "Choose…",
+    "ninguna": "(none)",
+    "sin_entrada": "This technique needs no input data.",
+    "elegir_carpeta": "Choose the folder with the spectra",
+    "elegir_archivo": "Choose the results file",
+    "filtro_output": "Results (output_*.txt)",
+    "filtro_todos": "All files"
+  },
+  "formulario": {
+    "restaurar": "Restore defaults",
+    "ejecutar": "▶ Run",
+    "calculando": "Running…",
+    "funcion": "Function:",
+    "avanzado_mostrar": "▸ Advanced",
+    "avanzado_ocultar": "▾ Advanced",
+    "errores_titulo": "Some fields have errors",
+    "errores_texto": "Fix these fields before running:",
+    "falta_entrada_carpeta": "Choose the folder with the spectra.",
+    "falta_entrada_archivo": "Choose the results file.",
+    "entrada_no_existe": "The chosen input no longer exists: {ruta}",
+    "falta_salida": "Choose the output folder (at the top).",
+    "verdadero": "Yes",
+    "falso": "No"
+  },
+  "tooltip": {
+    "unidad": "Unit",
+    "formula": "Formula",
+    "python": "Python parameter"
+  },
+  "parametros": {
+    "n_lineas": {"etiqueta": "Lines per spectrum", "ayuda": "Number of Lorentzian lines fitted in each spectrum: 1 or 2. Line 1 is always the one at the highest field."},
+    "ventana": {"etiqueta": "Window", "ayuda": "Half-width of the field region that belongs to one line. Used to estimate the initial values of each line and to hide the first one while looking for the second.", "aviso": "It should be larger than a linewidth and smaller than the separation between the two lines."},
+    "extensiones": {"etiqueta": "Extensions", "ayuda": "Extensions of the spectrum files that are read, separated by commas (for example: .dat, .txt). Files starting with fit_ or output_ are always skipped."},
+    "skiprows": {"etiqueta": "Header lines", "ayuda": "Number of header lines skipped when reading each spectrum."},
+    "col_Hr": {"etiqueta": "Hr column", "ayuda": "Column number of the resonance field in the file. Column 0 is the frequency or angle."},
+    "col_ancho": {"etiqueta": "Width column", "ayuda": "Column number of the peak-to-peak linewidth."},
+    "g_limites": {"etiqueta": "g range (min, max)", "ayuda": "Allowed range of g in the Kittel fit, as two numbers separated by a comma: 2.0, 2.2.", "aviso": "If g ends at one of the limits, the fit is forced and its error is not reliable."},
+    "ajustar_Hu": {"etiqueta": "Fit H_u", "ayuda": "Yes: fit the uniaxial anisotropy field. No: keep it fixed at the H_u value."},
+    "H_uniaxial": {"etiqueta": "H_u", "ayuda": "Uniaxial anisotropy field (fixed value, or ignored if it is fitted).", "formula": "H_u = 2K_u/M_s"},
+    "H_cubico": {"etiqueta": "H_c", "ayuda": "Cubic anisotropy field. Always fixed: along an easy axis it cannot be separated from H_u.", "formula": "H_c = 2K_1/M_s"},
+    "eje_facil": {"etiqueta": "Field along easy axis", "ayuda": "Yes: the field is along an easy axis. No: along a hard axis. Selects the Kittel formula.", "aviso": "The hard-axis formula is pending revision in the code."},
+    "col_angulo": {"etiqueta": "Angle column", "ayuda": "Column number of the angle in the file (usually 0)."},
+    "defasaje_deg": {"etiqueta": "Angle offset", "ayuda": "Shift of the experimental angles so that they match the theory. Measured points are plotted at (angle − offset)."},
+    "magn": {"etiqueta": "M_s", "ayuda": "Saturation magnetisation."},
+    "g": {"etiqueta": "g", "ayuda": "g factor.", "formula": "γ = 8.794×10⁶·g rad s⁻¹ Oe⁻¹"},
+    "Hu": {"etiqueta": "H_u", "ayuda": "In-plane uniaxial anisotropy field. The easy axis is at ang_u.", "formula": "H_u = 2K_u/M_s"},
+    "Hc": {"etiqueta": "H_c", "ayuda": "Cubic (four-fold) anisotropy field. With H_c > 0 the easy axes are at 45° from the reference.", "formula": "H_c = 2K_c/M_s"},
+    "ang_u": {"etiqueta": "Easy-axis angle", "ayuda": "In-plane direction of the uniaxial easy axis, measured from the same reference as the field angle (for example MgO[100])."},
+    "frecuencia": {"etiqueta": "Frequency", "ayuda": "Measurement frequency. Entered in GHz and converted to Hz before calling the function."},
+    "ang_inicio": {"etiqueta": "Start angle", "ayuda": "First simulated field angle."},
+    "ang_fin": {"etiqueta": "End angle", "ayuda": "Last simulated field angle (included)."},
+    "paso_ang": {"etiqueta": "Angle step", "ayuda": "Step between simulated angles. Smaller = more points and longer calculation."},
+    "margen_campo": {"etiqueta": "Field margin", "ayuda": "Oe added below and above the experimental Hr range for the simulation.", "aviso": "If the resonance of some angle falls outside that range, the calculation stops: increase the margin."},
+    "paso_campo": {"etiqueta": "Field step", "ayuda": "Step of the field grid. Hr is linearly interpolated between two grid fields: smaller = more accurate Hr and slower."},
+    "paso_phi_M": {"etiqueta": "M grid step", "ayuda": "Step in degrees of the grid used to find the equilibrium angle of M (refined afterwards for bilayers and eigenvectors)."},
+    "magn_a": {"etiqueta": "M_s layer a", "ayuda": "Saturation magnetisation of layer a."},
+    "magn_b": {"etiqueta": "M_s layer b", "ayuda": "Saturation magnetisation of layer b."},
+    "espesor_a": {"etiqueta": "Thickness layer a", "ayuda": "Thickness of layer a. Entered in nm and converted to cm before calling the function."},
+    "espesor_b": {"etiqueta": "Thickness layer b", "ayuda": "Thickness of layer b. Entered in nm and converted to cm before calling the function."},
+    "g_a": {"etiqueta": "g layer a", "ayuda": "g factor of layer a."},
+    "g_b": {"etiqueta": "g layer b", "ayuda": "g factor of layer b."},
+    "A": {"etiqueta": "Coupling A", "ayuda": "Interlayer coupling. A > 0: ferromagnetic; A < 0: antiferromagnetic.", "formula": "E = −A·(m_a · m_b)", "aviso": "With A < 0 the names 'acoustic' (lower frequency) and 'optical' are inverted."},
+    "Hc_a": {"etiqueta": "H_c layer a", "ayuda": "Cubic anisotropy field of layer a.", "formula": "H_c = 2K_c/M_s"},
+    "Hc_b": {"etiqueta": "H_c layer b", "ayuda": "Cubic anisotropy field of layer b.", "formula": "H_c = 2K_c/M_s"},
+    "Hu_a": {"etiqueta": "H_u layer a", "ayuda": "Uniaxial anisotropy field of layer a.", "formula": "H_u = 2K_u/M_s"},
+    "Hu_b": {"etiqueta": "H_u layer b", "ayuda": "Uniaxial anisotropy field of layer b.", "formula": "H_u = 2K_u/M_s"},
+    "damp": {"etiqueta": "Damping α", "ayuda": "Gilbert damping."},
+    "damp_a": {"etiqueta": "α layer a", "ayuda": "Gilbert damping of layer a."},
+    "damp_b": {"etiqueta": "α layer b", "ayuda": "Gilbert damping of layer b."},
+    "ang_campo": {"etiqueta": "Field angle", "ayuda": "In-plane field angle, from the same reference as the easy axis."},
+    "campo_min": {"etiqueta": "Minimum field", "ayuda": "First field of the grid."},
+    "campo_max": {"etiqueta": "Maximum field", "ayuda": "Last field of the grid (not included)."},
+    "h_rf": {"etiqueta": "Microwave field", "ayuda": "Amplitude of the microwave field that drives the precession. The response is linear in h_rf."},
+    "guardar_gif": {"etiqueta": "Save GIF", "ayuda": "Creates the animation of the precession (takes a few more seconds)."},
+    "n_tiempos": {"etiqueta": "Time points per period", "ayuda": "Number of time points in one precession period, including t = 0 and t = T."}
+  },
+  "parametros_tecnica": {
+    "broadband": {
+      "col_Hr": {"ayuda": "Column number of Hr. For output_1peak.txt / output_2peak.txt it is 1 (line 1); for output_bipolar.txt use 5 (mean Hr)."},
+      "col_ancho": {"ayuda": "Column number of the peak-to-peak width. output_1peak.txt: 2. output_bipolar.txt: 2 (negative branch) or 4 (positive branch)."}
+    },
+    "angular_op": {
+      "magn": {"etiqueta": "M_eff", "ayuda": "Effective magnetisation (the layer has no in-plane anisotropy: the perpendicular anisotropy is included in M_eff)."},
+      "margen_campo": {"aviso": "It must be larger than the field step."}
+    },
+    "angular_bicapa": {
+      "col_Hr": {"etiqueta": "Hr columns", "ayuda": "Column, or list of columns separated by commas, with the experimental Hr to plot. For output_2peak.txt: 1, 3 (both lines)."}
+    },
+    "dispersion": {
+      "damp": {"ayuda": "Gilbert damping. It is included in the matrix, but the frequency only changes by a term of order α²."}
+    }
+  },
+  "advertencias": {
+    "sobrescribe": "Output files are named with some parameters; if a file with the same name already exists in the output folder, it is overwritten.",
+    "eje_dificil": "Hard axis: the hard-axis Kittel formula is pending revision in the code. Check the results.",
+    "acople_negativo": "A < 0 (antiferro): modes are named by frequency, so 'acoustic' and 'optical' are inverted. Look at the phase between layers.",
+    "rango_ip": "If at some angle the resonance falls outside the simulated field range, the calculation stops with an error: increase the field margin."
+  },
+  "errores": {
+    "vacio": "The field is empty.",
+    "no_numero": "“{texto}” is not a number.",
+    "no_entero": "“{texto}” is not an integer.",
+    "opcion_invalida": "It must be one of: {opciones}.",
+    "par_invalido": "It must be two numbers separated by a comma (for example: 2.0, 2.2).",
+    "par_orden": "The first value must be smaller than the second.",
+    "debe_ser_positivo": "It must be greater than zero.",
+    "menor_que_minimo": "It cannot be smaller than {minimo}.",
+    "mayor_que_maximo": "It cannot be larger than {maximo}.",
+    "campo_min_max": "The minimum field must be smaller than the maximum field.",
+    "ang_inicio_fin": "The end angle cannot be smaller than the start angle.",
+    "margen_paso": "The field margin must be larger than the field step."
+  },
+  "ejecucion": {
+    "listo": "Done in {segundos:.1f} s.",
+    "listo_avisos": "Done in {segundos:.1f} s, with {n} warning(s):",
+    "sobrescritos": "{n} existing file(s) were overwritten.",
+    "error": "Error: {mensaje}",
+    "sin_figuras": "The technique produced no plots.",
+    "ver_registro": "Show log",
+    "registro_titulo": "Log of the last run",
+    "registro_vacio": "Nothing has been run yet."
+  },
+  "resultados": {
+    "titulo": "Results",
+    "archivo": "File:",
+    "abrir_carpeta": "Open output folder",
+    "ver_graficos": "Show plots",
+    "abrir_gif": "Open GIF",
+    "sin_resultados": "Run a technique to see the results table here.",
+    "no_se_pudo_leer": "Could not read {archivo} as a table.",
+    "sin_tablas": "The run produced no tables (.txt)."
+  },
+  "graficos": {
+    "titulo": "Plots: {tecnica} ({n})",
+    "anterior": "◀ Previous",
+    "siguiente": "Next ▶",
+    "figura": "Figure {n}"
+  },
+  "dialogo_error": {
+    "titulo": "An error occurred",
+    "texto": "The technique “{tecnica}” ended with an error:",
+    "consejo": "Check the parameters and the input data. If you think it is a bug, please report it.",
+    "ver_detalles": "Show details",
+    "ocultar_detalles": "Hide details",
+    "reportar": "Report this error",
+    "cerrar": "Close"
+  },
+  "reporte": {
+    "titulo_dialogo": "Report a problem",
+    "tipo_pregunta": "What happened?",
+    "tipo_error": "The program gave an error",
+    "tipo_resultado": "The result looks wrong (no error)",
+    "descripcion_pregunta": "Describe what you were doing and what you expected:",
+    "info_adjunta": "Attached information (you can edit it before sending):",
+    "enviar": "Open email to send",
+    "cancelar": "Cancel",
+    "enviado": "Your email program was opened with the report. Check it and send it from there.",
+    "enviado_con_archivo": "The report was long: it was saved in full in\n{ruta}\nYour email program was opened with a summary. Attach that file before sending.",
+    "sin_cliente": "No email program could be opened. The report was saved in\n{ruta}\nPlease send it to {correo}.",
+    "titulo_tipo": "Problem type",
+    "fecha": "Date",
+    "descripcion": "Description",
+    "tecnica": "Technique",
+    "entrada": "Input",
+    "salida": "Output",
+    "parametros": "Parameters",
+    "entorno": "Environment",
+    "traceback": "Traceback",
+    "consola": "Console output",
+    "error": "Error",
+    "adjuntar": "The full report is long and is in the file {archivo}. Please attach it to this email.",
+    "asunto": "[fmrtoolkit] Problem report: {tecnica}"
+  }
+}

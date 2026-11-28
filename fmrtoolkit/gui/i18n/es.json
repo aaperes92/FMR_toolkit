@@ -1,0 +1,222 @@
+{
+  "app": {
+    "titulo": "FMR toolkit",
+    "carpeta_salida": "Carpeta de salida:",
+    "sin_carpeta": "(sin elegir)",
+    "cambiar": "Cambiar…",
+    "elegir_carpeta_salida": "Elegí la carpeta donde se guardan los resultados",
+    "pedir_carpeta_titulo": "Carpeta de salida",
+    "pedir_carpeta_texto": "Todavía no elegiste una carpeta de salida. Los resultados (tablas, gráficos, GIF) se guardan ahí. Elegila ahora.",
+    "idioma": "Idioma:",
+    "reportar": "⚠ Reportar un problema",
+    "elegir_tecnica": "Elegí una técnica en la barra de la izquierda.",
+    "documentacion": "Documentación"
+  },
+  "secciones": {
+    "experimento": "EXPERIMENTO",
+    "teoria": "TEORÍA"
+  },
+  "grupos": {
+    "datos": "Datos",
+    "ajuste": "Ajuste",
+    "material": "Material",
+    "anisotropia": "Anisotropía",
+    "campo": "Campo",
+    "simulacion": "Simulación",
+    "avanzado": "Avanzado"
+  },
+  "tecnicas": {
+    "fit_positive": {"nombre": "Ajuste 0 → +H", "descripcion": "Ajusta cada espectro de una carpeta (barrido de 0 a +H) con 1 o 2 líneas lorentzianas. Da Hr, ancho de línea (pico a pico) y fase de cada línea."},
+    "fit_bipolar": {"nombre": "Ajuste −H → +H", "descripcion": "Ajusta cada espectro de una carpeta (barrido de −H a +H) con una línea por rama. Da Hr de cada rama, Hr medio, desplazamiento del campo y anchos (pico a pico)."},
+    "broadband": {"nombre": "Banda ancha", "descripcion": "Ajuste de Kittel f(Hr) → g y M_eff (y H_u opcional), y ancho de línea ΔH(f) → amortiguamiento α y ΔH₀. Lee un output_*.txt de los ajustes."},
+    "angular_ip": {"nombre": "Var. angular en el plano · 1 capa", "descripcion": "Hr teórico en función del ángulo del campo en el plano (anisotropía uniaxial + cúbica), comparado con una serie angular medida. Los parámetros no se ajustan: se eligen a mano."},
+    "angular_op": {"nombre": "Var. angular fuera del plano · 1 capa", "descripcion": "Hr teórico con el campo rotando fuera del plano (0° = en el plano, 90° = normal), comparado con una serie angular medida. Capa sin anisotropía en el plano."},
+    "angular_bicapa": {"nombre": "Var. angular en el plano · bicapa", "descripcion": "Hr de los modos acústico y óptico de una bicapa acoplada en función del ángulo del campo en el plano, comparado con una serie angular medida."},
+    "dispersion": {"nombre": "Dispersión", "descripcion": "Relación de dispersión f(H) para un ángulo del campo fijo. No necesita datos medidos."},
+    "autovectores": {"nombre": "Autovectores", "descripcion": "Precesión de M en la resonancia: componentes dinámicas en el tiempo, elipses de precesión y un GIF animado. No necesita datos medidos."}
+  },
+  "variantes": {
+    "titulo": "Sistema:",
+    "1capa": "1 capa",
+    "2capas": "2 capas",
+    "bicapa": "Bicapa",
+    "unica": ""
+  },
+  "entrada": {
+    "titulo": "Entrada",
+    "carpeta": "Carpeta con los espectros:",
+    "archivo": "Archivo de resultados (output_*.txt):",
+    "elegir": "Elegir…",
+    "ninguna": "(ninguna)",
+    "sin_entrada": "Esta técnica no necesita datos de entrada.",
+    "elegir_carpeta": "Elegí la carpeta con los espectros",
+    "elegir_archivo": "Elegí el archivo de resultados",
+    "filtro_output": "Resultados (output_*.txt)",
+    "filtro_todos": "Todos los archivos"
+  },
+  "formulario": {
+    "restaurar": "Restaurar valores por defecto",
+    "ejecutar": "▶ Ejecutar",
+    "calculando": "Calculando…",
+    "funcion": "Función:",
+    "avanzado_mostrar": "▸ Avanzado",
+    "avanzado_ocultar": "▾ Avanzado",
+    "errores_titulo": "Hay campos con errores",
+    "errores_texto": "Corregí estos campos antes de ejecutar:",
+    "falta_entrada_carpeta": "Elegí la carpeta con los espectros.",
+    "falta_entrada_archivo": "Elegí el archivo de resultados.",
+    "entrada_no_existe": "La entrada elegida ya no existe: {ruta}",
+    "falta_salida": "Elegí la carpeta de salida (arriba).",
+    "verdadero": "Sí",
+    "falso": "No"
+  },
+  "tooltip": {
+    "unidad": "Unidad",
+    "formula": "Fórmula",
+    "python": "Parámetro en Python"
+  },
+  "parametros": {
+    "n_lineas": {"etiqueta": "Líneas por espectro", "ayuda": "Cantidad de líneas lorentzianas que se ajustan en cada espectro: 1 o 2. La línea 1 es siempre la de campo más alto."},
+    "ventana": {"etiqueta": "Ventana", "ayuda": "Semiancho de la zona de campo que pertenece a una misma línea. Se usa para estimar los valores iniciales de cada línea y para tapar la primera al buscar la segunda.", "aviso": "Tiene que ser mayor que un ancho de línea y menor que la separación entre las dos líneas."},
+    "extensiones": {"etiqueta": "Extensiones", "ayuda": "Extensiones de los archivos de espectros que se leen, separadas por coma (por ejemplo: .dat, .txt). Los archivos que empiezan con fit_ u output_ se saltean siempre."},
+    "skiprows": {"etiqueta": "Líneas de encabezado", "ayuda": "Cantidad de líneas de encabezado que se saltean al leer cada espectro."},
+    "col_Hr": {"etiqueta": "Columna de Hr", "ayuda": "Número de columna del archivo que tiene el campo de resonancia. La columna 0 es la frecuencia o el ángulo."},
+    "col_ancho": {"etiqueta": "Columna del ancho", "ayuda": "Número de columna con el ancho de línea pico a pico."},
+    "g_limites": {"etiqueta": "Rango de g (mín, máx)", "ayuda": "Rango permitido para g en el ajuste de Kittel, como dos números separados por coma: 2.0, 2.2.", "aviso": "Si g termina pegado a uno de los límites, el ajuste está forzado y su error no es confiable."},
+    "ajustar_Hu": {"etiqueta": "Ajustar H_u", "ayuda": "Sí: ajusta el campo de anisotropía uniaxial. No: lo deja fijo en el valor de H_u."},
+    "H_uniaxial": {"etiqueta": "H_u", "ayuda": "Campo de anisotropía uniaxial (valor fijo, o valor que se ignora si se ajusta).", "formula": "H_u = 2K_u/M_s"},
+    "H_cubico": {"etiqueta": "H_c", "ayuda": "Campo de anisotropía cúbica. Siempre fijo: sobre un eje fácil no se distingue de H_u.", "formula": "H_c = 2K_1/M_s"},
+    "eje_facil": {"etiqueta": "Campo sobre eje fácil", "ayuda": "Sí: el campo está sobre un eje fácil. No: sobre un eje difícil. Elige la fórmula de Kittel.", "aviso": "La fórmula de eje difícil está pendiente de revisión en el código."},
+    "col_angulo": {"etiqueta": "Columna del ángulo", "ayuda": "Número de columna del archivo con el ángulo (normalmente la 0)."},
+    "defasaje_deg": {"etiqueta": "Desfasaje", "ayuda": "Corrimiento de los ángulos experimentales para que coincidan con la teoría. Los puntos medidos se grafican en (ángulo − desfasaje)."},
+    "magn": {"etiqueta": "M_s", "ayuda": "Magnetización de saturación."},
+    "g": {"etiqueta": "g", "ayuda": "Factor g.", "formula": "γ = 8.794×10⁶·g rad s⁻¹ Oe⁻¹"},
+    "Hu": {"etiqueta": "H_u", "ayuda": "Campo de anisotropía uniaxial en el plano. El eje fácil está en ang_u.", "formula": "H_u = 2K_u/M_s"},
+    "Hc": {"etiqueta": "H_c", "ayuda": "Campo de anisotropía cúbica (4 ejes). Con H_c > 0 los ejes fáciles están a 45° de la referencia.", "formula": "H_c = 2K_c/M_s"},
+    "ang_u": {"etiqueta": "Ángulo del eje fácil", "ayuda": "Dirección del eje fácil uniaxial en el plano, medida desde la misma referencia que el ángulo del campo (por ejemplo MgO[100])."},
+    "frecuencia": {"etiqueta": "Frecuencia", "ayuda": "Frecuencia de medición. Se escribe en GHz y se pasa a Hz antes de llamar a la función."},
+    "ang_inicio": {"etiqueta": "Ángulo inicial", "ayuda": "Primer ángulo del campo que se simula."},
+    "ang_fin": {"etiqueta": "Ángulo final", "ayuda": "Último ángulo del campo que se simula (incluido)."},
+    "paso_ang": {"etiqueta": "Paso angular", "ayuda": "Paso entre ángulos simulados. Más chico = más puntos y más tiempo de cálculo."},
+    "margen_campo": {"etiqueta": "Margen de campo", "ayuda": "Oe que se agregan por debajo y por encima del rango de Hr experimental para la simulación.", "aviso": "Si la resonancia de algún ángulo queda fuera de ese rango, el cálculo se detiene: aumentá el margen."},
+    "paso_campo": {"etiqueta": "Paso de campo", "ayuda": "Paso de la grilla de campos. Hr se interpola linealmente entre dos campos de la grilla: más chico = Hr más preciso y más lento."},
+    "paso_phi_M": {"etiqueta": "Paso de la grilla de M", "ayuda": "Paso en grados de la grilla con que se busca el ángulo de equilibrio de M (en bicapas y autovectores después se refina)."},
+    "magn_a": {"etiqueta": "M_s capa a", "ayuda": "Magnetización de saturación de la capa a."},
+    "magn_b": {"etiqueta": "M_s capa b", "ayuda": "Magnetización de saturación de la capa b."},
+    "espesor_a": {"etiqueta": "Espesor capa a", "ayuda": "Espesor de la capa a. Se escribe en nm y se pasa a cm antes de llamar a la función."},
+    "espesor_b": {"etiqueta": "Espesor capa b", "ayuda": "Espesor de la capa b. Se escribe en nm y se pasa a cm antes de llamar a la función."},
+    "g_a": {"etiqueta": "g capa a", "ayuda": "Factor g de la capa a."},
+    "g_b": {"etiqueta": "g capa b", "ayuda": "Factor g de la capa b."},
+    "A": {"etiqueta": "Acople A", "ayuda": "Acople entre capas. A > 0: ferromagnético; A < 0: antiferromagnético.", "formula": "E = −A·(m_a · m_b)", "aviso": "Con A < 0 los nombres 'acústico' (menor frecuencia) y 'óptico' quedan invertidos."},
+    "Hc_a": {"etiqueta": "H_c capa a", "ayuda": "Campo de anisotropía cúbica de la capa a.", "formula": "H_c = 2K_c/M_s"},
+    "Hc_b": {"etiqueta": "H_c capa b", "ayuda": "Campo de anisotropía cúbica de la capa b.", "formula": "H_c = 2K_c/M_s"},
+    "Hu_a": {"etiqueta": "H_u capa a", "ayuda": "Campo de anisotropía uniaxial de la capa a.", "formula": "H_u = 2K_u/M_s"},
+    "Hu_b": {"etiqueta": "H_u capa b", "ayuda": "Campo de anisotropía uniaxial de la capa b.", "formula": "H_u = 2K_u/M_s"},
+    "damp": {"etiqueta": "Amortiguamiento α", "ayuda": "Amortiguamiento de Gilbert."},
+    "damp_a": {"etiqueta": "α capa a", "ayuda": "Amortiguamiento de Gilbert de la capa a."},
+    "damp_b": {"etiqueta": "α capa b", "ayuda": "Amortiguamiento de Gilbert de la capa b."},
+    "ang_campo": {"etiqueta": "Ángulo del campo", "ayuda": "Ángulo del campo en el plano, desde la misma referencia que el eje fácil."},
+    "campo_min": {"etiqueta": "Campo mínimo", "ayuda": "Primer campo de la grilla."},
+    "campo_max": {"etiqueta": "Campo máximo", "ayuda": "Último campo de la grilla (no incluido)."},
+    "h_rf": {"etiqueta": "Campo de microondas", "ayuda": "Amplitud del campo de microondas que excita la precesión. La respuesta es lineal en h_rf."},
+    "guardar_gif": {"etiqueta": "Guardar GIF", "ayuda": "Genera la animación de la precesión (tarda unos segundos más)."},
+    "n_tiempos": {"etiqueta": "Instantes por período", "ayuda": "Cantidad de instantes en un período de precesión, incluyendo t = 0 y t = T."}
+  },
+  "parametros_tecnica": {
+    "broadband": {
+      "col_Hr": {"ayuda": "Número de columna con Hr. Para output_1peak.txt / output_2peak.txt es 1 (línea 1); para output_bipolar.txt usá 5 (Hr medio)."},
+      "col_ancho": {"ayuda": "Número de columna con el ancho pico a pico. output_1peak.txt: 2. output_bipolar.txt: 2 (rama negativa) o 4 (rama positiva)."}
+    },
+    "angular_op": {
+      "magn": {"etiqueta": "M_eff", "ayuda": "Magnetización efectiva (la capa no tiene anisotropía en el plano: la anisotropía perpendicular queda incluida en M_eff)."},
+      "margen_campo": {"aviso": "Tiene que ser mayor que el paso de campo."}
+    },
+    "angular_bicapa": {
+      "col_Hr": {"etiqueta": "Columnas de Hr", "ayuda": "Columna, o lista de columnas separadas por coma, con el Hr experimental que se grafica. Para output_2peak.txt: 1, 3 (las dos líneas)."}
+    },
+    "dispersion": {
+      "damp": {"ayuda": "Amortiguamiento de Gilbert. Se incluye en la matriz, pero la frecuencia cambia solo en un término del orden de α²."}
+    }
+  },
+  "advertencias": {
+    "sobrescribe": "Los archivos de salida se nombran con algunos parámetros; si ya existe uno con el mismo nombre en la carpeta de salida, se sobrescribe.",
+    "eje_dificil": "Eje difícil: la fórmula de Kittel para eje difícil está pendiente de revisión en el código. Revisá los resultados.",
+    "acople_negativo": "A < 0 (antiferro): los modos se nombran por frecuencia, así que 'acústico' y 'óptico' quedan invertidos. Mirá la fase entre capas.",
+    "rango_ip": "Si en algún ángulo la resonancia queda fuera del rango de campos simulado, el cálculo se detiene con un error: aumentá el margen de campo."
+  },
+  "errores": {
+    "vacio": "El campo está vacío.",
+    "no_numero": "«{texto}» no es un número.",
+    "no_entero": "«{texto}» no es un número entero.",
+    "opcion_invalida": "Tiene que ser uno de: {opciones}.",
+    "par_invalido": "Tienen que ser dos números separados por coma (por ejemplo: 2.0, 2.2).",
+    "par_orden": "El primer valor tiene que ser menor que el segundo.",
+    "debe_ser_positivo": "Tiene que ser mayor que cero.",
+    "menor_que_minimo": "No puede ser menor que {minimo}.",
+    "mayor_que_maximo": "No puede ser mayor que {maximo}.",
+    "campo_min_max": "El campo mínimo tiene que ser menor que el campo máximo.",
+    "ang_inicio_fin": "El ángulo final no puede ser menor que el inicial.",
+    "margen_paso": "El margen de campo tiene que ser mayor que el paso de campo."
+  },
+  "ejecucion": {
+    "listo": "Listo en {segundos:.1f} s.",
+    "listo_avisos": "Listo en {segundos:.1f} s, con {n} aviso(s):",
+    "sobrescritos": "Se sobrescribieron {n} archivo(s) que ya existían.",
+    "error": "Error: {mensaje}",
+    "sin_figuras": "La técnica no generó gráficos.",
+    "ver_registro": "Ver registro",
+    "registro_titulo": "Registro de la última ejecución",
+    "registro_vacio": "Todavía no se ejecutó nada."
+  },
+  "resultados": {
+    "titulo": "Resultados",
+    "archivo": "Archivo:",
+    "abrir_carpeta": "Abrir carpeta de salida",
+    "ver_graficos": "Ver gráficos",
+    "abrir_gif": "Abrir GIF",
+    "sin_resultados": "Ejecutá una técnica para ver acá la tabla de resultados.",
+    "no_se_pudo_leer": "No se pudo leer {archivo} como tabla.",
+    "sin_tablas": "La ejecución no generó tablas (.txt)."
+  },
+  "graficos": {
+    "titulo": "Gráficos: {tecnica} ({n})",
+    "anterior": "◀ Anterior",
+    "siguiente": "Siguiente ▶",
+    "figura": "Figura {n}"
+  },
+  "dialogo_error": {
+    "titulo": "Ocurrió un error",
+    "texto": "La técnica «{tecnica}» terminó con un error:",
+    "consejo": "Revisá los parámetros y los datos de entrada. Si creés que es un problema del programa, reportalo.",
+    "ver_detalles": "Ver detalles",
+    "ocultar_detalles": "Ocultar detalles",
+    "reportar": "Reportar este error",
+    "cerrar": "Cerrar"
+  },
+  "reporte": {
+    "titulo_dialogo": "Reportar un problema",
+    "tipo_pregunta": "¿Qué pasó?",
+    "tipo_error": "El programa dio un error",
+    "tipo_resultado": "El resultado parece incorrecto (no hubo error)",
+    "descripcion_pregunta": "Contá qué estabas haciendo y qué esperabas obtener:",
+    "info_adjunta": "Información que se adjunta (podés editarla antes de enviar):",
+    "enviar": "Abrir el correo para enviar",
+    "cancelar": "Cancelar",
+    "enviado": "Se abrió tu programa de correo con el reporte. Revisalo y envialo desde ahí.",
+    "enviado_con_archivo": "El reporte era largo: se guardó completo en\n{ruta}\nSe abrió tu programa de correo con un resumen. Adjuntá ese archivo antes de enviar.",
+    "sin_cliente": "No se pudo abrir un programa de correo. El reporte se guardó en\n{ruta}\nEnvialo a {correo}.",
+    "titulo_tipo": "Tipo de problema",
+    "fecha": "Fecha",
+    "descripcion": "Descripción",
+    "tecnica": "Técnica",
+    "entrada": "Entrada",
+    "salida": "Salida",
+    "parametros": "Parámetros",
+    "entorno": "Entorno",
+    "traceback": "Traceback",
+    "consola": "Salida de consola",
+    "error": "Error",
+    "adjuntar": "El reporte completo es largo y está en el archivo {archivo}. Por favor adjuntalo a este correo.",
+    "asunto": "[fmrtoolkit] Reporte de problema: {tecnica}"
+  }
+}
